@@ -10,7 +10,7 @@ import numpy as np
 import time
 from hand_tracker import HandTracker
 from mouse_controller import MouseController
-from utils import smooth_position, is_palm_facing_camera
+from utils import smooth_position, is_palm_facing_camera, is_palm_rightside_up
 import config
 
 def main():
@@ -53,7 +53,7 @@ def main():
 
             if hand_landmarks:
                 # Check if palm is facing camera
-                if not is_palm_facing_camera(hand_landmarks, handedness):
+                if not is_palm_facing_camera(hand_landmarks, handedness) and not is_palm_rightside_up(hand_landmarks):
                     # If palm not facing camera, ensure mouse is released and skip logic
                     mouse_ctrl.leftRelease()
                     mouse_ctrl.rightRelease()
@@ -144,20 +144,20 @@ def main():
                     index_pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
                     middle_pinch_distance = np.hypot(middle_tip_x - thumb_x, middle_tip_y - thumb_y)
                     # Visual feedback for pinch gesture
-                    cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
+                    cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2  )
                     cv2.putText(img, f'Left Click: '+ str(mouse_ctrl.left_pressed), (40, 450), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
                     cv2.putText(img, f'Right Click: '+ str(mouse_ctrl.right_pressed), (40, 500), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
                     # Handle Right Click
-                    if middle_pinch_distance < config.CLICK_DISTANCE_RATIO * palm_size:
+                    if middle_pinch_distance < config.RIGHT_CLICK_DISTANCE_RATIO * palm_size:
                         mouse_ctrl.rightClick()
                     else:
                         mouse_ctrl.rightRelease()
                     
                     # Handle Left Click
-                    if index_pinch_distance < config.CLICK_DISTANCE_RATIO * palm_size:
+                    if index_pinch_distance < config.LEFT_CLICK_DISTANCE_RATIO * palm_size:
                         mouse_ctrl.leftClick()
                     else:
                         mouse_ctrl.leftRelease()

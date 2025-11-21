@@ -92,3 +92,26 @@ def is_palm_facing_camera(hand_landmarks, handedness_info):
             is_palm = True
             
     return is_palm
+
+def is_palm_rightside_up(hand_landmarks):
+    """
+    Determines if the palm is upside down based on wrist and finger MCP positions.
+    
+    Args:
+        hand_landmarks: The detected hand landmarks.
+        
+    Returns:
+        bool: True if the palm is likely right side up, False otherwise.
+    """
+    # Landmark indices
+    WRIST = 0
+    MIDDLE_MCP = 9
+    
+    wrist_y = hand_landmarks.landmark[WRIST].y
+    middle_mcp_y = hand_landmarks.landmark[MIDDLE_MCP].y
+    
+    # If wrist is below both MCPs, palm is right side up
+    if wrist_y > middle_mcp_y:
+        return True
+    return False
+    
