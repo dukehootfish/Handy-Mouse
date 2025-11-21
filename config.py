@@ -29,3 +29,9 @@ TOGGLE_COOLDOWN = 2.0  # Seconds to wait between toggles
 # Screen Mapping
 SCREEN_MAPPING_WIDTH_DIVISOR = 1200
 SCREEN_MAPPING_HEIGHT_DIVISOR = 675
+
+# Scroll Settings
+INVERT_SCROLL_DIRECTION = False # Set to True to invert scroll direction
+SCROLL_SPEED_FACTOR = 0.1 # Multiplier for scroll speed
+SCROLL_DEADZONE = 30 # Pixels of movement required to start scrolling
+FIST_DETECTION_LEEWAY = 0.5 # Seconds to wait before ending scroll mode if fist is lost
