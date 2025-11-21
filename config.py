@@ -14,7 +14,9 @@ CAM_HEIGHT = 720
 THUMB_TIP_IDX = 4
 INDEX_FINGER_TIP_IDX = 8
 MIDDLE_FINGER_MCP_IDX = 9
+MIDDLE_FINGER_TIP_IDX = 12
 RING_FINGER_TIP_IDX = 16
+PINKY_TIP_IDX = 20
 WRIST_IDX = 0
 CURSOR_TRACKING_IDX = 5  # Index finger MCP (metacarpophalangeal joint)
 
@@ -22,6 +24,7 @@ CURSOR_TRACKING_IDX = 5  # Index finger MCP (metacarpophalangeal joint)
 CLICK_DISTANCE_THRESHOLD = 40  # Distance between thumb and index for a click
 MOVEMENT_STABILITY_THRESHOLD = 10  # Minimum distance to register mouse movement
 SMOOTHING_FACTOR = 0.2  # Smoothing factor (0.0 to 1.0). Lower = smoother but more lag.
+TOGGLE_COOLDOWN = 2.0  # Seconds to wait between toggles
 
 # Screen Mapping
 SCREEN_MAPPING_WIDTH_DIVISOR = 1200

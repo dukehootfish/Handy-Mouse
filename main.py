@@ -37,7 +37,6 @@ def main():
     # Toggle state
     system_active = True
     last_toggle_time = 0
-    TOGGLE_COOLDOWN = 1.0 # Seconds
 
     print("HandyMouse started. Press 'Esc' to exit.")
 
@@ -54,6 +53,7 @@ def main():
 
             if hand_landmarks:
                 # Toggle Logic: Ring finger tip touches palm (Wrist/Base)
+                # AND other fingers (Index, Middle, Pinky) are extended (not touching palm)
                 ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
                     hand_landmarks, config.RING_FINGER_TIP_IDX, (img_h, img_w)
                 )
@@ -64,14 +64,39 @@ def main():
                 palm_base_x, palm_base_y = tracker.get_landmark_pos(
                     hand_landmarks, config.MIDDLE_FINGER_MCP_IDX, (img_h, img_w)
                 )
+                
+                # Get other finger tips to ensure they are NOT curled
+                index_tip_x, index_tip_y = tracker.get_landmark_pos(
+                     hand_landmarks, config.INDEX_FINGER_TIP_IDX, (img_h, img_w)
+                )
+                middle_tip_x, middle_tip_y = tracker.get_landmark_pos(
+                     hand_landmarks, config.MIDDLE_FINGER_TIP_IDX, (img_h, img_w)
+                )
+                pinky_tip_x, pinky_tip_y = tracker.get_landmark_pos(
+                     hand_landmarks, config.PINKY_TIP_IDX, (img_h, img_w)
+                )
 
+                # Distances to wrist
                 ring_to_wrist_dist = np.hypot(ring_tip_x - wrist_x, ring_tip_y - wrist_y)
+                index_to_wrist_dist = np.hypot(index_tip_x - wrist_x, index_tip_y - wrist_y)
+                middle_to_wrist_dist = np.hypot(middle_tip_x - wrist_x, middle_tip_y - wrist_y)
+                pinky_to_wrist_dist = np.hypot(pinky_tip_x - wrist_x, pinky_tip_y - wrist_y)
+                
                 palm_size = np.hypot(palm_base_x - wrist_x, palm_base_y - wrist_y)
 
-                # If ring finger is curled (distance to wrist is comparable to palm size)
-                if ring_to_wrist_dist < palm_size:
+                # Check conditions:
+                # 1. Ring finger curled (close to wrist)
+                # 2. Index, Middle, Pinky extended (far from wrist)
+                ring_curled = ring_to_wrist_dist < palm_size
+                others_extended = (
+                    index_to_wrist_dist > palm_size * 1.5 and
+                    middle_to_wrist_dist > palm_size * 1.5 and
+                    pinky_to_wrist_dist > palm_size * 1.2 # Pinky is naturally shorter
+                )
+
+                if ring_curled and others_extended:
                     current_time = time.time()
-                    if current_time - last_toggle_time > TOGGLE_COOLDOWN:
+                    if current_time - last_toggle_time > config.TOGGLE_COOLDOWN:
                         system_active = not system_active
                         last_toggle_time = current_time
                         if not system_active:
