@@ -64,4 +64,8 @@ You can adjust settings in `config.py`:
 - [ ] Volume Control
 - [ ] Toggle mute
 - [ ] Decide gestures
+- [ ] Extra click options
+  - [ ] Scroll
+  - [ ] Right Click
+  - [ ] Keep on/off
 
