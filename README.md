@@ -63,5 +63,5 @@ You can adjust settings in `config.py`:
   - [ ] Scroll
 - [ ] Volume Control
 - [ ] Toggle mute
-- [ ] Decide gestures for
+- [ ] Decide gestures
 
