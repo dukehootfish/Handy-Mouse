@@ -1,70 +1,112 @@
-import mediapipe as mp
-import wx
-import numpy as np
+"""
+HandyMouse Main Application.
+
+This is the entry point for the HandyMouse application. It captures video from the webcam,
+tracks hand movements using MediaPipe, and controls the mouse cursor based on hand gestures.
+"""
+
 import cv2
-from pynput.mouse import Button,Controller
+import numpy as np
+from hand_tracker import HandTracker
+from mouse_controller import MouseController
+from utils import is_stable_movement
+import config
 
-draw = mp.solutions.drawing_utils
-handSolution = mp.solutions.hands
-hands = handSolution.Hands()
-videoCap = cv2.VideoCapture(0)
-thumbIDX = 4
-indexIDX = 8
+def main():
+    """
+    Main application loop.
+    """
+    # Initialize Hand Tracker
+    tracker = HandTracker(max_num_hands=1)
 
-followIDX = 5
+    # Initialize Mouse Controller
+    mouse_ctrl = MouseController()
 
-videoCap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-videoCap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    # Initialize Video Capture
+    video_cap = cv2.VideoCapture(0)
+    video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
+    video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
 
-mouse = Controller()
-app = wx.App(False)
-(sx, sy) = wx.GetDisplaySize()
-
-mouse_location = np.array([0,0])
-previous_mouse_location = np.array([0,0])
-pressed = False
-
-def is_stable_movement(true_loc, virtual_loc, threshold=10):
+    # State variables for mouse smoothing
+    mouse_location = np.array([0, 0])
+    previous_mouse_location = np.array([0, 0])
     
-    distance = np.linalg.norm(true_loc - virtual_loc)
-    return distance > threshold
+    # Flag to initialize mouse_location on first detection
+    is_first_detection = True
 
-while True:
-    success, img = videoCap.read()
-    if success:
-        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        recHands = hands.process(imgRGB)
-        if recHands.multi_hand_landmarks: 
+    print("HandyMouse started. Press 'Esc' to exit.")
+
+    try:
+        while True:
+            success, img = video_cap.read()
+            if not success:
+                print("Failed to grab frame.")
+                break
+
+            # Process frame for hand tracking
+            img, hand_landmarks = tracker.process_frame(img)
+            img_h, img_w = img.shape[:2]
+
+            if hand_landmarks:
+                # Get coordinates for cursor tracking (Index Finger MCP)
+                track_x, track_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.CURSOR_TRACKING_IDX, (img_h, img_w)
+                )
+
+                # Visual feedback for tracking point
+                cv2.circle(img, (track_x, track_y), 7, (255, 0, 0), cv2.FILLED)
+
+                # Calculate current mouse location based on movement delta
+                # The original logic adds the delta of the current frame to the *previous* smooth location
+                current_raw_location = previous_mouse_location + (np.array([track_x, track_y]) - previous_mouse_location)
+
+                if is_first_detection:
+                    mouse_location = np.array([track_x, track_y]) # Initialize with first valid point
+                    previous_mouse_location = mouse_location # Sync previous
+                    is_first_detection = False
+                
+                # Stabilize movement
+                if is_stable_movement(current_raw_location, mouse_location, config.MOVEMENT_STABILITY_THRESHOLD):
+                    mouse_location = current_raw_location
+                
+                # Move mouse
+                mouse_ctrl.move_to(mouse_location)
+                previous_mouse_location = mouse_location
+
+                # Gesture Recognition for Click (Pinch)
+                thumb_x, thumb_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.THUMB_TIP_IDX, (img_h, img_w)
+                )
+                index_x, index_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.INDEX_FINGER_TIP_IDX, (img_h, img_w)
+                )
+
+                # Calculate distance between thumb and index finger
+                pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
+
+                # Visual feedback for pinch gesture
+                cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
+                cv2.putText(img, f'Distance: {int(pinch_distance)}', (40, 450), 
+                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+
+                # Handle Click
+                if pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                    mouse_ctrl.click()
+                else:
+                    mouse_ctrl.release()
+
+            # Display the output
+            cv2.imshow("HandyMouse - CamOutput", img)
             
-            hand= recHands.multi_hand_landmarks[0]
-            draw.draw_landmarks(img, hand, handSolution.HAND_CONNECTIONS)
+            # Exit on 'Esc' key
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
 
-            h, w = img.shape[:2]
-            lm = hand.landmark
-            x, y = int(lm[followIDX].x * w), int(lm[followIDX].y * h)
-            cv2.circle(img, (x, y), 7, (255, 0, 0), cv2.FILLED)
-            true_mouse_location = previous_mouse_location + ((int(x),int(y)) - previous_mouse_location)
-            if 'mouse_location' not in locals():
-                mouse_location = true_mouse_location
-            if is_stable_movement(true_mouse_location, mouse_location):
-                print("Moving Mouse")
-                mouse_location = true_mouse_location
-            mouse.position = (sx-(mouse_location[0]*sx/1200),mouse_location[1]*sy/675)
-            previous_mouse_location = mouse_location
-            thumb_x,thumb_y = int(lm[thumbIDX].x * w), int(lm[thumbIDX].y * h)
-            index_x, index_y = int(lm[indexIDX].x * w), int(lm[indexIDX].y * h)
-            distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
-            cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
-            cv2.putText(img, f'Distance: {int(distance)}', (40, 450), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-            if(distance < 40 and not pressed):
-                #print("Click")
-                mouse.press(Button.left)
-                pressed = True
-            elif(distance >= 40):
-                #print("Unclick")
-                mouse.release(Button.left)
-                pressed = False
+    except KeyboardInterrupt:
+        print("Interrupted by user.")
+    finally:
+        video_cap.release()
+        cv2.destroyAllWindows()
 
-    cv2.imshow("CamOutput", img)
-    cv2.waitKey(1)
-
+if __name__ == "__main__":
+    main()

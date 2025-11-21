@@ -1,5 +1,5 @@
 mediapipe
-wxpython
+wxPython
 numpy
 pynput
 opencv-contrib-python
