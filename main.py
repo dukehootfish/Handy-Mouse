@@ -100,7 +100,8 @@ def main():
                         system_active = not system_active
                         last_toggle_time = current_time
                         if not system_active:
-                            mouse_ctrl.release() # Ensure mouse is released when disabling
+                            mouse_ctrl.leftRelease() # Ensure mouse is released when disabling
+                            mouse_ctrl.rightRelease()
                         print(f"System Active: {system_active}")
 
                 # Existing Mouse Logic (only if active)
@@ -133,20 +134,27 @@ def main():
                     index_x, index_y = tracker.get_landmark_pos(
                         hand_landmarks, config.INDEX_FINGER_TIP_IDX, (img_h, img_w)
                     )
-
                     # Calculate distance between thumb and index finger
-                    pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
-
+                    index_pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
+                    middle_pinch_distance = np.hypot(middle_tip_x - thumb_x, middle_tip_y - thumb_y)
                     # Visual feedback for pinch gesture
                     cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
-                    cv2.putText(img, f'Distance: {int(pinch_distance)}', (40, 450), 
+                    cv2.putText(img, f'Distance: {int(index_pinch_distance)}', (40, 450), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
 
-                    # Handle Click
-                    if pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
-                        mouse_ctrl.click()
+    
+                    # Handle Right Click
+                    if middle_pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                        print("Right Click")
+                        mouse_ctrl.rightClick()
                     else:
-                        mouse_ctrl.release()
+                        mouse_ctrl.rightRelease()
+                    
+                    # Handle Left Click
+                    if index_pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                        mouse_ctrl.leftClick()
+                    else:
+                        mouse_ctrl.leftRelease()
             
             # Status Display
             status_text = "Active" if system_active else "Paused"

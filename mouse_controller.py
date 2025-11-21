@@ -46,7 +46,7 @@ class MouseController:
         
         self.mouse.position = (target_x, target_y)
 
-    def click(self):
+    def leftClick(self):
         """
         Performs a left mouse click (press down) if not already pressed.
         """
@@ -55,7 +55,23 @@ class MouseController:
             self.pressed = True
             # print("Click")
 
-    def release(self):
+    def rightClick(self):
+        """
+        Performs a right mouse click (press down) if not already pressed.
+        """
+        if not self.pressed:
+            self.mouse.press(Button.right)
+            self.pressed = True
+            # print("Right Click")
+    def rightRelease(self):
+        """
+        Releases the right mouse button if it is currently pressed.
+        """
+        if self.pressed:
+            self.mouse.release(Button.right)
+            self.pressed = False
+            # print("Right Unclick")
+    def leftRelease(self):
         """
         Releases the left mouse button if it is currently pressed.
         """
