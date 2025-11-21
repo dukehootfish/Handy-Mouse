@@ -40,6 +40,7 @@ def main():
 
     # Scroll state
     scroll_active = False
+    scroll_origin_x = None
     scroll_origin_y = None
     fist_lost_time = None
 
@@ -131,6 +132,7 @@ def main():
                     if fist_detected:
                         if not scroll_active:
                             scroll_active = True
+                            scroll_origin_x = wrist_x
                             scroll_origin_y = wrist_y
                             fist_lost_time = None
                             # Ensure no buttons are held while scrolling
@@ -155,6 +157,16 @@ def main():
                             if config.INVERT_SCROLL_DIRECTION:
                                 dy = -dy
                             mouse_ctrl.scroll(dy)
+
+                        # Visualize initial fist point and vertical delta
+                        if scroll_origin_x is not None and scroll_origin_y is not None:
+                            origin_pt = (int(scroll_origin_x), int(scroll_origin_y))
+                            current_pt = (int(scroll_origin_x), int(wrist_y))
+                            cv2.circle(img, origin_pt, 7, (0, 255, 255), 2)
+                            cv2.line(img, origin_pt, current_pt, (0, 255, 255), 2)
+                            text_pos = (origin_pt[0] + 10, int((origin_pt[1] + current_pt[1]) / 2))
+                            cv2.putText(img, f'dy: {int(delta_y)} px', text_pos,
+                                        cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
 
                         cv2.putText(img, "Scroll: ON", (40, 550),
                                     cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
