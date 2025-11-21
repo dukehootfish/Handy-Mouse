@@ -57,3 +57,9 @@ You can adjust settings in `config.py`:
 - [X] Stabilisation
 - [X] General setting
   - [ ] Deciding hand
+- [X] Stabilisation
+* [ ] General setting
+  * [ ] Deciding hand
+  - [ ] Set Boundries
+- [ ] Mouse Toggle
+  - [ ] 
