@@ -38,7 +38,7 @@ class HandTracker:
             min_tracking_confidence=min_tracking_confidence
         )
 
-    def process_frame(self, img: np.ndarray) -> Tuple[np.ndarray, Optional[NamedTuple]]:
+    def process_frame(self, img: np.ndarray) -> Tuple[np.ndarray, Optional[NamedTuple], Optional[NamedTuple]]:
         """
         Process a single video frame to detect hands.
 
@@ -46,23 +46,29 @@ class HandTracker:
             img (np.ndarray): The input image (BGR format from OpenCV).
 
         Returns:
-            Tuple[np.ndarray, Optional[NamedTuple]]: 
+            Tuple[np.ndarray, Optional[NamedTuple], Optional[NamedTuple]]: 
                 - The processed image (BGR) with landmarks drawn (if any).
                 - The first detected hand landmarks object, or None if no hand is detected.
+                - The handedness classification (Left/Right) of the first hand, or None.
         """
         # Convert the BGR image to RGB before processing.
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = self.hands.process(img_rgb)
 
         hand_landmarks = None
+        handedness = None
 
         if results.multi_hand_landmarks:
             # For this app, we only care about the first hand detected (index 0)
             hand_landmarks = results.multi_hand_landmarks[0]
+            
+            if results.multi_handedness:
+                handedness = results.multi_handedness[0]
+            
             self.mp_drawing.draw_landmarks(
                 img, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
 
-        return img, hand_landmarks
+        return img, hand_landmarks, handedness
 
     def get_landmark_pos(self, hand_landmarks, landmark_idx: int, img_shape: Tuple[int, int]) -> Tuple[int, int]:
         """

@@ -10,7 +10,7 @@ import numpy as np
 import time
 from hand_tracker import HandTracker
 from mouse_controller import MouseController
-from utils import smooth_position
+from utils import smooth_position, is_palm_facing_camera
 import config
 
 def main():
@@ -48,15 +48,22 @@ def main():
                 break
 
             # Process frame for hand tracking
-            img, hand_landmarks = tracker.process_frame(img)
+            img, hand_landmarks, handedness = tracker.process_frame(img)
             img_h, img_w = img.shape[:2]
 
             if hand_landmarks:
-                # Toggle Logic: Ring finger tip touches palm (Wrist/Base)
-                # AND other fingers (Index, Middle, Pinky) are extended (not touching palm)
-                ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
-                    hand_landmarks, config.RING_FINGER_TIP_IDX, (img_h, img_w)
-                )
+                # Check if palm is facing camera
+                if not is_palm_facing_camera(hand_landmarks, handedness):
+                    # If palm not facing camera, ensure mouse is released and skip logic
+                    mouse_ctrl.release()
+                    cv2.putText(img, "Palm not facing camera", (40, 100), 
+                                cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+                else:
+                    # Toggle Logic: Ring finger tip touches palm (Wrist/Base)
+                    # AND other fingers (Index, Middle, Pinky) are extended (not touching palm)
+                    ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
+                        hand_landmarks, config.RING_FINGER_TIP_IDX, (img_h, img_w)
+                    )
                 wrist_x, wrist_y = tracker.get_landmark_pos(
                     hand_landmarks, config.WRIST_IDX, (img_h, img_w)
                 )
@@ -143,7 +150,7 @@ def main():
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
 
                     # Handle Click
-                    if pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                    if pinch_distance < (palm_size * config.CLICK_DISTANCE_RATIO):
                         mouse_ctrl.click()
                     else:
                         mouse_ctrl.release()
