@@ -21,8 +21,8 @@ WRIST_IDX = 0
 CURSOR_TRACKING_IDX = 5  # Index finger MCP (metacarpophalangeal joint)
 
 # Interaction Thresholds
-RIGHT_CLICK_DISTANCE_RATIO = 0.4  # Fraction of palm size (Wrist to Middle MCP) for a click
-LEFT_CLICK_DISTANCE_RATIO = 0.2   # Fraction of palm size for a click
+RIGHT_CLICK_DISTANCE_RATIO = 0.22  # Fraction of palm size (Wrist to Middle MCP) for a click
+LEFT_CLICK_DISTANCE_RATIO = 0.27   # Fraction of palm size for a click
 MOVEMENT_STABILITY_RATIO = 0.05  # Fraction of palm size for movement stability
 SMOOTHING_FACTOR = 0.2  # Smoothing factor (0.0 to 1.0). Lower = smoother but more lag.
 TOGGLE_COOLDOWN = 2.0  # Seconds to wait between toggles

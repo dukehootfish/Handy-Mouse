@@ -58,14 +58,14 @@ You can adjust settings in `config.py`:
 - [ ] General setting
   - [ ] Deciding hand
   - [ ] Set Boundries
-- [ ] Mouse Toggle
-  - [ ] Right Click
-  - [ ] Scroll
+- [X] Mouse Toggle
+  - [X] Right Click
+  - [X] Scroll
 - [ ] Volume Control
 - [ ] Toggle mute
 - [ ] Decide gestures
-- [ ] Extra click options
-  - [ ] Scroll
-  - [ ] Right Click
+- [X] Extra click options
+  - [X] Scroll
+  - [X] Right Click
   - [X] Keep on/off
 
