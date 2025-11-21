@@ -59,11 +59,15 @@ def main():
 
             if hand_landmarks:
                 # Check if palm is facing camera
-                if not is_palm_facing_camera(hand_landmarks, handedness) and not is_palm_rightside_up(hand_landmarks):
+                if not is_palm_facing_camera(hand_landmarks, handedness) or not is_palm_rightside_up(hand_landmarks):
                     # If palm not facing camera, ensure mouse is released and skip logic
                     mouse_ctrl.leftRelease()
                     mouse_ctrl.rightRelease()
-                    cv2.putText(img, "Palm not facing camera", (40, 100), 
+                    if not is_palm_facing_camera(hand_landmarks, handedness):
+                        cv2.putText(img, "Palm not facing camera", (40, 100), 
+                                cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+                    if not is_palm_rightside_up(hand_landmarks):
+                        cv2.putText(img, "Hand upside down", (40, 140), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
                 
                 ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
