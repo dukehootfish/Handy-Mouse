@@ -55,11 +55,13 @@ You can adjust settings in `config.py`:
 
 ## TODO
 - [X] Stabilisation
-- [X] General setting
+- [ ] General setting
   - [ ] Deciding hand
-- [X] Stabilisation
-* [ ] General setting
-  * [ ] Deciding hand
   - [ ] Set Boundries
 - [ ] Mouse Toggle
-  - [ ] 
+  - [ ] Right Click
+  - [ ] Scroll
+- [ ] Volume Control
+- [ ] Toggle mute
+- [ ] Decide gestures for
+
