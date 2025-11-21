@@ -25,6 +25,7 @@ class MouseController:
         self.mouse = Controller()
         self.app = wx.App(False)
         self.screen_width, self.screen_height = wx.GetDisplaySize()
+        self.pressed = False
         self.left_pressed = False
         self.right_pressed = False
 
@@ -47,31 +48,32 @@ class MouseController:
         
         self.mouse.position = (target_x, target_y)
 
-    def leftClick(self):
+    def click(self):
         """
         Performs a left mouse click (press down) if not already pressed.
+        """
+        if not self.pressed:
+            self.mouse.press(Button.left)
+            self.pressed = True
+            # print("Click")
+
+    def release(self):
+        """
+        Releases the left mouse button if it is currently pressed.
+        """
+        if self.pressed:
+            self.mouse.release(Button.left)
+            self.pressed = False
+            # print("Unclick")
+
+    def leftClick(self):
+        """
+        Performs a left mouse button press if not already pressed.
         """
         if not self.left_pressed:
             self.mouse.press(Button.left)
             self.left_pressed = True
-            print("Left Click")
 
-    def rightClick(self):
-        """
-        Performs a right mouse click (press down) if not already pressed.
-        """
-        if not self.right_pressed:
-            self.mouse.press(Button.right)
-            self.right_pressed = True
-            print("Right Click")
-    def rightRelease(self):
-        """
-        Releases the right mouse button if it is currently pressed.
-        """
-        if self.right_pressed:
-            self.mouse.release(Button.right)
-            self.right_pressed = False
-            # print("Right Unclick")
     def leftRelease(self):
         """
         Releases the left mouse button if it is currently pressed.
@@ -79,5 +81,29 @@ class MouseController:
         if self.left_pressed:
             self.mouse.release(Button.left)
             self.left_pressed = False
-            # print("Unclick")
+
+    def rightClick(self):
+        """
+        Performs a right mouse button press if not already pressed.
+        """
+        if not self.right_pressed:
+            self.mouse.press(Button.right)
+            self.right_pressed = True
+
+    def rightRelease(self):
+        """
+        Releases the right mouse button if it is currently pressed.
+        """
+        if self.right_pressed:
+            self.mouse.release(Button.right)
+            self.right_pressed = False
+
+    def scroll(self, dy: int):
+        """
+        Scrolls the mouse wheel vertically.
+
+        Args:
+            dy (int): Positive to scroll up, negative to scroll down.
+        """
+        self.mouse.scroll(0, int(dy))
 

@@ -38,6 +38,12 @@ def main():
     system_active = True
     last_toggle_time = 0
 
+    # Scroll state
+    scroll_active = False
+    scroll_origin_x = None
+    scroll_origin_y = None
+    fist_lost_time = None
+
     print("HandyMouse started. Press 'Esc' to exit.")
 
     try:
@@ -110,8 +116,63 @@ def main():
                             mouse_ctrl.rightRelease()
                         print(f"System Active: {system_active}")
 
-                # Existing Mouse Logic (only if active)
+                # Existing Mouse & Scroll Logic (only if active)
                 if system_active:
+                    # Detect fist gesture (all fingertips close to wrist)
+                    curl_threshold = palm_size * 1.1
+                    fist_detected = (
+                        index_to_wrist_dist < curl_threshold and
+                        middle_to_wrist_dist < curl_threshold and
+                        ring_to_wrist_dist < curl_threshold and
+                        pinky_to_wrist_dist < curl_threshold
+                    )
+
+                    current_time = time.time()
+
+                    if fist_detected:
+                        if not scroll_active:
+                            scroll_active = True
+                            scroll_origin_x = wrist_x
+                            scroll_origin_y = wrist_y
+                            fist_lost_time = None
+                            # Ensure no buttons are held while scrolling
+                            mouse_ctrl.leftRelease()
+                            mouse_ctrl.rightRelease()
+                    else:
+                        if scroll_active:
+                            if fist_lost_time is None:
+                                fist_lost_time = current_time
+                            elif current_time - fist_lost_time > config.FIST_DETECTION_LEEWAY:
+                                scroll_active = False
+                                scroll_origin_y = None
+                                fist_lost_time = None
+
+                    if scroll_active:
+                        # Compute scroll amount based on vertical distance from origin
+                        delta_y = wrist_y - scroll_origin_y
+                        distance = abs(delta_y) - config.SCROLL_DEADZONE
+                        if distance > 0:
+                            direction = -1 if delta_y < 0 else 1  # above origin => scroll up
+                            dy = int(max(1, min(10, distance * config.SCROLL_SPEED_FACTOR))) * direction
+                            if config.INVERT_SCROLL_DIRECTION:
+                                dy = -dy
+                            mouse_ctrl.scroll(dy)
+
+                        # Visualize initial fist point and vertical delta
+                        if scroll_origin_x is not None and scroll_origin_y is not None:
+                            origin_pt = (int(scroll_origin_x), int(scroll_origin_y))
+                            current_pt = (int(scroll_origin_x), int(wrist_y))
+                            cv2.circle(img, origin_pt, 7, (0, 255, 255), 2)
+                            cv2.line(img, origin_pt, current_pt, (0, 255, 255), 2)
+                            text_pos = (origin_pt[0] + 10, int((origin_pt[1] + current_pt[1]) / 2))
+                            cv2.putText(img, f'dy: {int(delta_y)} px', text_pos,
+                                        cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
+
+                        cv2.putText(img, "Scroll: ON", (40, 550),
+                                    cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
+                        # Skip cursor move and click handling while scrolling
+                        continue
+
                     # Get coordinates for cursor tracking (Index Finger MCP)
                     track_x, track_y = tracker.get_landmark_pos(
                         hand_landmarks, config.CURSOR_TRACKING_IDX, (img_h, img_w)
