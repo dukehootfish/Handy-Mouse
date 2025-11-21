@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 from hand_tracker import HandTracker
 from mouse_controller import MouseController
-from utils import is_stable_movement
+from utils import smooth_position
 import config
 
 def main():
@@ -29,7 +29,6 @@ def main():
 
     # State variables for mouse smoothing
     mouse_location = np.array([0, 0])
-    previous_mouse_location = np.array([0, 0])
     
     # Flag to initialize mouse_location on first detection
     is_first_detection = True
@@ -56,22 +55,19 @@ def main():
                 # Visual feedback for tracking point
                 cv2.circle(img, (track_x, track_y), 7, (255, 0, 0), cv2.FILLED)
 
-                # Calculate current mouse location based on movement delta
-                # The original logic adds the delta of the current frame to the *previous* smooth location
-                current_raw_location = previous_mouse_location + (np.array([track_x, track_y]) - previous_mouse_location)
+                # Calculate current raw mouse location
+                current_raw_location = np.array([track_x, track_y])
 
                 if is_first_detection:
-                    mouse_location = np.array([track_x, track_y]) # Initialize with first valid point
-                    previous_mouse_location = mouse_location # Sync previous
+                    mouse_location = current_raw_location # Initialize with first valid point
                     is_first_detection = False
                 
-                # Stabilize movement
-                if is_stable_movement(current_raw_location, mouse_location, config.MOVEMENT_STABILITY_THRESHOLD):
-                    mouse_location = current_raw_location
+                # Smooth movement
+                # Use exponential moving average to smooth out jitter without the "grid" effect
+                mouse_location = smooth_position(current_raw_location, mouse_location, config.SMOOTHING_FACTOR)
                 
                 # Move mouse
                 mouse_ctrl.move_to(mouse_location)
-                previous_mouse_location = mouse_location
 
                 # Gesture Recognition for Click (Pinch)
                 thumb_x, thumb_y = tracker.get_landmark_pos(
