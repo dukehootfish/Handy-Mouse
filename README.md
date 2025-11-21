@@ -54,6 +54,6 @@ You can adjust settings in `config.py`:
 - `MOVEMENT_STABILITY_THRESHOLD`: Adjust to change how much movement is needed to update cursor position (helps with jitter).
 
 ## TODO
-- [ ] Stabilisation
-- [ ] General setting
+- [X] Stabilisation
+- [X] General setting
   - [ ] Deciding hand
