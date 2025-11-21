@@ -7,6 +7,7 @@ tracks hand movements using MediaPipe, and controls the mouse cursor based on ha
 
 import cv2
 import numpy as np
+import time
 from hand_tracker import HandTracker
 from mouse_controller import MouseController
 from utils import smooth_position
@@ -33,6 +34,11 @@ def main():
     # Flag to initialize mouse_location on first detection
     is_first_detection = True
 
+    # Toggle state
+    system_active = True
+    last_toggle_time = 0
+    TOGGLE_COOLDOWN = 1.0 # Seconds
+
     print("HandyMouse started. Press 'Esc' to exit.")
 
     try:
@@ -47,49 +53,81 @@ def main():
             img_h, img_w = img.shape[:2]
 
             if hand_landmarks:
-                # Get coordinates for cursor tracking (Index Finger MCP)
-                track_x, track_y = tracker.get_landmark_pos(
-                    hand_landmarks, config.CURSOR_TRACKING_IDX, (img_h, img_w)
+                # Toggle Logic: Ring finger tip touches palm (Wrist/Base)
+                ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.RING_FINGER_TIP_IDX, (img_h, img_w)
+                )
+                wrist_x, wrist_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.WRIST_IDX, (img_h, img_w)
+                )
+                # Using Middle Finger MCP as a reference for palm scale
+                palm_base_x, palm_base_y = tracker.get_landmark_pos(
+                    hand_landmarks, config.MIDDLE_FINGER_MCP_IDX, (img_h, img_w)
                 )
 
-                # Visual feedback for tracking point
-                cv2.circle(img, (track_x, track_y), 7, (255, 0, 0), cv2.FILLED)
+                ring_to_wrist_dist = np.hypot(ring_tip_x - wrist_x, ring_tip_y - wrist_y)
+                palm_size = np.hypot(palm_base_x - wrist_x, palm_base_y - wrist_y)
 
-                # Calculate current raw mouse location
-                current_raw_location = np.array([track_x, track_y])
+                # If ring finger is curled (distance to wrist is comparable to palm size)
+                if ring_to_wrist_dist < palm_size:
+                    current_time = time.time()
+                    if current_time - last_toggle_time > TOGGLE_COOLDOWN:
+                        system_active = not system_active
+                        last_toggle_time = current_time
+                        if not system_active:
+                            mouse_ctrl.release() # Ensure mouse is released when disabling
+                        print(f"System Active: {system_active}")
 
-                if is_first_detection:
-                    mouse_location = current_raw_location # Initialize with first valid point
-                    is_first_detection = False
-                
-                # Smooth movement
-                # Use exponential moving average to smooth out jitter without the "grid" effect
-                mouse_location = smooth_position(current_raw_location, mouse_location, config.SMOOTHING_FACTOR)
-                
-                # Move mouse
-                mouse_ctrl.move_to(mouse_location)
+                # Existing Mouse Logic (only if active)
+                if system_active:
+                    # Get coordinates for cursor tracking (Index Finger MCP)
+                    track_x, track_y = tracker.get_landmark_pos(
+                        hand_landmarks, config.CURSOR_TRACKING_IDX, (img_h, img_w)
+                    )
 
-                # Gesture Recognition for Click (Pinch)
-                thumb_x, thumb_y = tracker.get_landmark_pos(
-                    hand_landmarks, config.THUMB_TIP_IDX, (img_h, img_w)
-                )
-                index_x, index_y = tracker.get_landmark_pos(
-                    hand_landmarks, config.INDEX_FINGER_TIP_IDX, (img_h, img_w)
-                )
+                    # Visual feedback for tracking point
+                    cv2.circle(img, (track_x, track_y), 7, (255, 0, 0), cv2.FILLED)
 
-                # Calculate distance between thumb and index finger
-                pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
+                    # Calculate current raw mouse location
+                    current_raw_location = np.array([track_x, track_y])
 
-                # Visual feedback for pinch gesture
-                cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
-                cv2.putText(img, f'Distance: {int(pinch_distance)}', (40, 450), 
-                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+                    if is_first_detection:
+                        mouse_location = current_raw_location # Initialize with first valid point
+                        is_first_detection = False
+                    
+                    # Smooth movement
+                    mouse_location = smooth_position(current_raw_location, mouse_location, config.SMOOTHING_FACTOR)
+                    
+                    # Move mouse
+                    mouse_ctrl.move_to(mouse_location)
 
-                # Handle Click
-                if pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
-                    mouse_ctrl.click()
-                else:
-                    mouse_ctrl.release()
+                    # Gesture Recognition for Click (Pinch)
+                    thumb_x, thumb_y = tracker.get_landmark_pos(
+                        hand_landmarks, config.THUMB_TIP_IDX, (img_h, img_w)
+                    )
+                    index_x, index_y = tracker.get_landmark_pos(
+                        hand_landmarks, config.INDEX_FINGER_TIP_IDX, (img_h, img_w)
+                    )
+
+                    # Calculate distance between thumb and index finger
+                    pinch_distance = np.hypot(index_x - thumb_x, index_y - thumb_y)
+
+                    # Visual feedback for pinch gesture
+                    cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
+                    cv2.putText(img, f'Distance: {int(pinch_distance)}', (40, 450), 
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+
+                    # Handle Click
+                    if pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                        mouse_ctrl.click()
+                    else:
+                        mouse_ctrl.release()
+            
+            # Status Display
+            status_text = "Active" if system_active else "Paused"
+            status_color = (0, 255, 0) if system_active else (0, 0, 255)
+            cv2.putText(img, f'System: {status_text}', (40, 50), 
+                        cv2.FONT_HERSHEY_PLAIN, 2, status_color, 2)
 
             # Display the output
             cv2.imshow("HandyMouse - CamOutput", img)

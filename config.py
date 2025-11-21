@@ -13,6 +13,9 @@ CAM_HEIGHT = 720
 # See: https://google.github.io/mediapipe/solutions/hands.html#hand-landmark-model
 THUMB_TIP_IDX = 4
 INDEX_FINGER_TIP_IDX = 8
+MIDDLE_FINGER_MCP_IDX = 9
+RING_FINGER_TIP_IDX = 16
+WRIST_IDX = 0
 CURSOR_TRACKING_IDX = 5  # Index finger MCP (metacarpophalangeal joint)
 
 # Interaction Thresholds
