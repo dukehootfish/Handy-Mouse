@@ -25,7 +25,8 @@ class MouseController:
         self.mouse = Controller()
         self.app = wx.App(False)
         self.screen_width, self.screen_height = wx.GetDisplaySize()
-        self.pressed = False
+        self.left_pressed = False
+        self.right_pressed = False
 
     def move_to(self, location: np.ndarray):
         """
@@ -50,33 +51,33 @@ class MouseController:
         """
         Performs a left mouse click (press down) if not already pressed.
         """
-        if not self.pressed:
+        if not self.left_pressed:
             self.mouse.press(Button.left)
-            self.pressed = True
-            # print("Click")
+            self.left_pressed = True
+            print("Left Click")
 
     def rightClick(self):
         """
         Performs a right mouse click (press down) if not already pressed.
         """
-        if not self.pressed:
+        if not self.right_pressed:
             self.mouse.press(Button.right)
-            self.pressed = True
-            # print("Right Click")
+            self.right_pressed = True
+            print("Right Click")
     def rightRelease(self):
         """
         Releases the right mouse button if it is currently pressed.
         """
-        if self.pressed:
+        if self.right_pressed:
             self.mouse.release(Button.right)
-            self.pressed = False
+            self.right_pressed = False
             # print("Right Unclick")
     def leftRelease(self):
         """
         Releases the left mouse button if it is currently pressed.
         """
-        if self.pressed:
+        if self.left_pressed:
             self.mouse.release(Button.left)
-            self.pressed = False
+            self.left_pressed = False
             # print("Unclick")
 

@@ -55,15 +55,14 @@ def main():
                 # Check if palm is facing camera
                 if not is_palm_facing_camera(hand_landmarks, handedness):
                     # If palm not facing camera, ensure mouse is released and skip logic
-                    mouse_ctrl.release()
+                    mouse_ctrl.leftRelease()
+                    mouse_ctrl.rightRelease()
                     cv2.putText(img, "Palm not facing camera", (40, 100), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
-                else:
-                    # Toggle Logic: Ring finger tip touches palm (Wrist/Base)
-                    # AND other fingers (Index, Middle, Pinky) are extended (not touching palm)
-                    ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
+                
+                ring_tip_x, ring_tip_y = tracker.get_landmark_pos(
                         hand_landmarks, config.RING_FINGER_TIP_IDX, (img_h, img_w)
-                    )
+                )
                 wrist_x, wrist_y = tracker.get_landmark_pos(
                     hand_landmarks, config.WRIST_IDX, (img_h, img_w)
                 )
@@ -146,19 +145,19 @@ def main():
                     middle_pinch_distance = np.hypot(middle_tip_x - thumb_x, middle_tip_y - thumb_y)
                     # Visual feedback for pinch gesture
                     cv2.line(img, (thumb_x, thumb_y), (index_x, index_y), (255, 0, 255), 2)
-                    cv2.putText(img, f'Distance: {int(index_pinch_distance)}', (40, 450), 
+                    cv2.putText(img, f'Left Click: '+ str(mouse_ctrl.left_pressed), (40, 450), 
                                 cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-
+                    cv2.putText(img, f'Right Click: '+ str(mouse_ctrl.right_pressed), (40, 500), 
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
     
                     # Handle Right Click
-                    if middle_pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
-                        print("Right Click")
+                    if middle_pinch_distance < config.CLICK_DISTANCE_RATIO * palm_size:
                         mouse_ctrl.rightClick()
                     else:
                         mouse_ctrl.rightRelease()
                     
                     # Handle Left Click
-                    if index_pinch_distance < config.CLICK_DISTANCE_THRESHOLD:
+                    if index_pinch_distance < config.CLICK_DISTANCE_RATIO * palm_size:
                         mouse_ctrl.leftClick()
                     else:
                         mouse_ctrl.leftRelease()
