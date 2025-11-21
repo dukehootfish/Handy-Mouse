@@ -1,0 +1,5 @@
+mediapipe
+wxpython
+numpy
+pynput
+opencv-contrib-python
