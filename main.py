@@ -152,7 +152,8 @@ def main():
                         delta_y = wrist_y - scroll_origin_y
                         distance = abs(delta_y) - config.SCROLL_DEADZONE
                         if distance > 0:
-                            direction = -1 if delta_y < 0 else 1  # above origin => scroll up
+                            # Map movement like a mouse: moving up => scroll up, moving down => scroll down
+                            direction = 1 if delta_y < 0 else -1
                             dy = int(max(1, min(10, distance * config.SCROLL_SPEED_FACTOR))) * direction
                             if config.INVERT_SCROLL_DIRECTION:
                                 dy = -dy
