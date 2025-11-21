@@ -53,3 +53,7 @@ You can adjust settings in `config.py`:
 - `CLICK_DISTANCE_THRESHOLD`: Adjust how close fingers need to be to register a click.
 - `MOVEMENT_STABILITY_THRESHOLD`: Adjust to change how much movement is needed to update cursor position (helps with jitter).
 
+## TODO
+- [] Stabilisation
+- [] General setting
+- - [] Deciding hand
