@@ -90,6 +90,11 @@ def is_palm_facing_camera(hand_landmarks, handedness_info):
         # Expect Pinky < Index for Palm
         if pinky_mcp_x < index_mcp_x:
             is_palm = True
+
+    # When the hand is upside down, MediaPipe's handedness logic appears flipped.
+    # In that case, invert the palm assumption so gestures remain intuitive.
+    if hand_landmarks and not is_palm_rightside_up(hand_landmarks):
+        is_palm = not is_palm
             
     return is_palm
 
