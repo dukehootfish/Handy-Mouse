@@ -3,3 +3,5 @@ wxPython
 numpy
 pynput
 opencv-contrib-python
+comtypes
+pycaw
