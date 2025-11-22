@@ -2,19 +2,21 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
+
 class AudioController:
     def __init__(self):
         # Setup Speakers
         devices = AudioUtilities.GetSpeakers()
         # GetSpeakers returns an AudioDevice object which already has EndpointVolume
         self.volume = devices.EndpointVolume
-        
+
         # Setup Microphone
         # Try to get default microphone
         try:
             mic_device = AudioUtilities.GetMicrophone()
             mic_interface = mic_device.Activate(
-                IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                IAudioEndpointVolume._iid_, CLSCTX_ALL, None
+            )
             self.mic_volume = cast(mic_interface, POINTER(IAudioEndpointVolume))
         except Exception as e:
             print(f"Error initializing microphone: {e}")
@@ -72,6 +74,5 @@ class AudioController:
 
     def toggle_mic(self):
         """Toggle microphone mute state."""
-        if self.mic_volume:
-            current_mute = self.mic_volume.GetMute()
-            self.mic_volume.SetMute(not current_mute, None)
+        current_mute = self.mic_volume.GetMute()
+        self.mic_volume.SetMute(not current_mute, None)
