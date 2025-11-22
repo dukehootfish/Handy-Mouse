@@ -104,7 +104,7 @@ SCREEN_MAPPING_HEIGHT_DIVISOR = 675
 # Scroll Settings
 
 
-INVERT_SCROLL_DIRECTION_VERTICAL = False  # Set to True to invert vertical scroll direction
+INVERT_SCROLL_DIRECTION_VERTICAL = True  # Set to True to invert vertical scroll direction
 INVERT_SCROLL_DIRECTION_HORIZONTAL = False  # Set to True to invert horizontal scroll direction
 
 
