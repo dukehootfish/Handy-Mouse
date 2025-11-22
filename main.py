@@ -53,6 +53,7 @@ def main():
     activation_start_time = None
     activation_anchor_x = None
     activation_anchor_y = None
+    activation_drift_frames = 0
 
     # Scroll state
     scroll_active = False
@@ -183,23 +184,30 @@ def main():
                                     activation_start_time = current_time
                                     activation_anchor_x = wrist_x
                                     activation_anchor_y = wrist_y
+                                    activation_drift_frames = 0
                                     print("Activation pending: hold gesture steady...")
                                 else:
                                     # Check stillness relative to initial anchor and palm-size wiggle allowance
                                     move_dist = np.hypot(wrist_x - activation_anchor_x, wrist_y - activation_anchor_y)
-                                    allowed_wiggle = config.MOVEMENT_STABILITY_RATIO * palm_size
+                                    allowed_wiggle = max(config.TOGGLE_ON_WIGGLE_MIN_PX, config.TOGGLE_ON_WIGGLE_RATIO * palm_size)
                                     if move_dist > allowed_wiggle:
-                                        # Too much movement: restart the hold from now
-                                        activation_start_time = current_time
-                                        activation_anchor_x = wrist_x
-                                        activation_anchor_y = wrist_y
-                                    elif (current_time - activation_start_time) >= config.TOGGLE_ON_STILLNESS_SECONDS:
+                                        # Debounced reset: require drift for N consecutive frames
+                                        activation_drift_frames += 1
+                                        if activation_drift_frames >= config.TOGGLE_ON_DRIFT_FRAMES:
+                                            activation_start_time = current_time
+                                            activation_anchor_x = wrist_x
+                                            activation_anchor_y = wrist_y
+                                            activation_drift_frames = 0
+                                    else:
+                                        activation_drift_frames = 0
+                                    if (current_time - activation_start_time) >= config.TOGGLE_ON_STILLNESS_SECONDS:
                                         system_active = True
                                         last_toggle_time = current_time
                                         activation_pending = False
                                         activation_start_time = None
                                         activation_anchor_x = None
                                         activation_anchor_y = None
+                                        activation_drift_frames = 0
                                         print(f"System Active: {system_active}")
                         else:
                             # Toggle OFF occurs immediately with cooldown
@@ -210,6 +218,7 @@ def main():
                                 activation_start_time = None
                                 activation_anchor_x = None
                                 activation_anchor_y = None
+                                activation_drift_frames = 0
                                 mouse_ctrl.leftRelease() # Ensure mouse is released when disabling
                                 mouse_ctrl.rightRelease()
                                 print(f"System Active: {system_active}")
@@ -220,6 +229,7 @@ def main():
                             activation_start_time = None
                             activation_anchor_x = None
                             activation_anchor_y = None
+                            activation_drift_frames = 0
 
                     # Existing Mouse & Scroll Logic (only if active)
                     if system_active:

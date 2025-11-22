@@ -27,6 +27,9 @@ MOVEMENT_STABILITY_RATIO = 0.05  # Fraction of palm size for movement stability
 SMOOTHING_FACTOR = 0.2  # Smoothing factor (0.0 to 1.0). Lower = smoother but more lag.
 TOGGLE_COOLDOWN = 2.0  # Seconds to wait between toggles
 TOGGLE_ON_STILLNESS_SECONDS = 2.0  # Seconds to hold toggle-on gesture steadily before enabling
+TOGGLE_ON_WIGGLE_RATIO = 0.12  # Allowed movement during activation as fraction of palm size
+TOGGLE_ON_WIGGLE_MIN_PX = 18.0  # Minimum pixel wiggle allowed regardless of hand size
+TOGGLE_ON_DRIFT_FRAMES = 3  # Number of consecutive frames outside wiggle before resetting timer
 
 # Screen Mapping
 SCREEN_MAPPING_WIDTH_DIVISOR = 1200
