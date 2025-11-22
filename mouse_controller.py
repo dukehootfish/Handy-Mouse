@@ -98,12 +98,13 @@ class MouseController:
             self.mouse.release(Button.right)
             self.right_pressed = False
 
-    def scroll(self, dy: int):
+    def scroll(self, dx: int, dy: int):
         """
-        Scrolls the mouse wheel vertically.
+        Scrolls the mouse wheel vertically and/or horizontally.
 
         Args:
+            dx (int): Positive to scroll right, negative to scroll left.
             dy (int): Positive to scroll up, negative to scroll down.
         """
-        self.mouse.scroll(0, int(dy))
+        self.mouse.scroll(int(dx), int(dy))
 

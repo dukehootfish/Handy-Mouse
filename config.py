@@ -62,11 +62,15 @@ RIGHT_CLICK_DISTANCE_RATIO = (
 
 LEFT_CLICK_DISTANCE_RATIO = 0.27  # Fraction of palm size for a click
 
+# Long Click Settings
+LONG_CLICK_DURATION = 0.5 # Seconds to hold a click to trigger long click mode
+LONG_CLICK_RELEASE_GRACE_PERIOD = 0.1 # Seconds of lost detection allowed before releasing long click
+
 
 MOVEMENT_STABILITY_RATIO = 0.05  # Fraction of palm size for movement stability
 
 
-SMOOTHING_FACTOR = 0.2  # Smoothing factor (0.0 to 1.0). Lower = smoother but more lag.
+SMOOTHING_FACTOR = 0.25  # Smoothing factor (0.0 to 1.0). Lower = smoother but more lag.
 
 
 TOGGLE_COOLDOWN = 2.0  # Seconds to wait between toggles
@@ -100,14 +104,11 @@ SCREEN_MAPPING_HEIGHT_DIVISOR = 675
 # Scroll Settings
 
 
-INVERT_SCROLL_DIRECTION = False  # Set to True to invert scroll direction
+INVERT_SCROLL_DIRECTION_VERTICAL = False  # Set to True to invert vertical scroll direction
+INVERT_SCROLL_DIRECTION_HORIZONTAL = False  # Set to True to invert horizontal scroll direction
 
 
-SCROLL_SPEED_FACTOR = 0.003  # Multiplier for scroll speed
-
-
-SCROLL_DEADZONE = 120  # Pixels of movement required to start scrolling
-
+SCROLL_SPEED_FACTOR = 0.05  # Multiplier for scroll speed (drag-to-scroll sensitivity)
 
 FIST_DETECTION_LEEWAY = 0.1  # Seconds to wait before ending scroll mode if fist is lost
 

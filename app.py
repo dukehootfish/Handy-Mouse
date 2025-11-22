@@ -32,173 +32,109 @@ class HandyMouseApp:
         # Initialize Controllers
 
         self.tracker = HandTracker(max_num_hands=1)
-
         self.mouse_ctrl = MouseController()
-
         self.vol_ctrl = AudioController()
 
         # Video Capture
-
         self.video_cap = cv2.VideoCapture(0)
-
         self.video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
-
         self.video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
 
         # State - System
-
         self.system_active = False
-
         self.last_toggle_time = 0
-
         self.activation_pending = False
-
         self.activation_start_time = None
-
         self.activation_anchor_x = None
-
         self.activation_anchor_y = None
-
         self.activation_drift_frames = 0
 
         # State - Mouse Smoothing
-
         self.mouse_location = np.array([0, 0])
-
         self.is_first_detection = True
 
         # State - Volume
-
         self.volume_active = False
-
         self.volume_confirm_count = 0
-
         self.volume_pose_last_seen_time = None
-
         self.volume_theta_prev = 0.0
-
         self.volume_percent_current = 0.0
-
         self.volume_percent_applied = None
 
         # State - Mic Mute
-
         self.mic_mute_handled = False
-
         self.last_mic_toggle_time = 0
 
         # State - Scroll
-
         self.scroll_active = False
-
         self.scroll_origin_x = None
-
         self.scroll_origin_y = None
-
         self.fist_lost_time = None
 
+        # State - Long Click
+        self.long_click_start_time = None
+        self.last_click_detected_time = 0
+        self.is_long_clicking = False
+
         # Gesture Mapping (Priority Order)
-
         # These return True if they consumed the frame
-
         self.mode_handlers = [self.handle_volume_mode, self.handle_scroll_mode]
 
     def run(self):
 
         print("HandyMouse started. Press 'Esc' to exit.")
-
         try:
-
             while True:
-
                 success, img = self.video_cap.read()
-
                 if not success:
-
                     print("Failed to grab frame.")
-
                     break
 
                 # Process Hand
-
                 img, hand_landmarks, handedness = self.tracker.process_frame(img)
-
                 img_h, img_w = img.shape[:2]
-
                 if hand_landmarks:
-
                     # Orientation Check
-
                     if not self._check_orientation(img, hand_landmarks, handedness):
-
                         self._reset_inputs()
-
                     else:
-
                         # Create Hand Data
-
                         hand_data = HandData(hand_landmarks, (img_h, img_w))
-
                         # Check Activation/Deactivation
-
                         self._handle_system_toggle(hand_data)
-
                         if self.system_active:
-
                             # Try specific modes
-
                             frame_consumed = False
-
                             for handler in self.mode_handlers:
-
                                 if handler(img, hand_data):
-
                                     frame_consumed = True
-
                                     break
 
                             # Default to Cursor Mode
-
                             if not frame_consumed:
-
                                 self.handle_cursor_mode(img, hand_data)
 
                 # Status Display
-
                 self._draw_status(img)
-
                 cv2.imshow("HandyMouse - CamOutput", img)
-
                 if cv2.waitKey(1) & 0xFF == 27:
-
                     break
 
         except KeyboardInterrupt:
-
             print("Interrupted by user.")
-
         finally:
-
             self.video_cap.release()
-
             cv2.destroyAllWindows()
 
     def _reset_inputs(self):
-
         self.mouse_ctrl.leftRelease()
-
         self.mouse_ctrl.rightRelease()
 
     def _check_orientation(self, img, landmarks, handedness):
-
         palm_facing = is_palm_facing_camera(landmarks, handedness)
-
         rightside_up = is_palm_rightside_up(landmarks)
-
         if not (palm_facing and rightside_up):
-
             if not palm_facing:
-
                 cv2.putText(
                     img,
                     "Palm not facing camera",
@@ -210,7 +146,6 @@ class HandyMouseApp:
                 )
 
             if not rightside_up:
-
                 cv2.putText(
                     img,
                     "Hand upside down",
@@ -226,138 +161,82 @@ class HandyMouseApp:
         return True
 
     def _handle_system_toggle(self, hand_data):
-
         if detectors.is_activation_pose(hand_data):
-
             current_time = time.time()
-
             if (current_time - self.last_toggle_time) > config.TOGGLE_COOLDOWN:
-
                 if not self.system_active:
-
                     # Activation Sequence
-
                     self._process_activation_hold(current_time, hand_data)
-
                 else:
-
                     # Instant Deactivation
-
                     self.system_active = False
-
                     self.last_toggle_time = current_time
-
                     self._reset_activation_state()
-
                     self._reset_inputs()
-
                     print(f"System Active: {self.system_active}")
 
         else:
-
             # Reset pending activation if pose broken
-
             if self.activation_pending:
-
                 self._reset_activation_state()
 
     def _process_activation_hold(self, current_time, hand_data):
-
         wrist_x, wrist_y = hand_data.wrist
-
         if not self.activation_pending:
-
             self.activation_pending = True
-
             self.activation_start_time = current_time
-
             self.activation_anchor_x = wrist_x
-
             self.activation_anchor_y = wrist_y
-
             self.activation_drift_frames = 0
 
             print("Activation pending: hold gesture steady...")
-
         else:
-
             # Check stillness
-
             move_dist = np.hypot(
                 wrist_x - self.activation_anchor_x, wrist_y - self.activation_anchor_y
             )
-
             allowed_wiggle = max(
                 config.TOGGLE_ON_WIGGLE_MIN_PX,
                 config.TOGGLE_ON_WIGGLE_RATIO * hand_data.palm_size,
             )
-
             if move_dist > allowed_wiggle:
-
                 self.activation_drift_frames += 1
-
                 if self.activation_drift_frames >= config.TOGGLE_ON_DRIFT_FRAMES:
-
                     # Reset anchor
-
                     self.activation_start_time = current_time
-
                     self.activation_anchor_x = wrist_x
-
                     self.activation_anchor_y = wrist_y
-
                     self.activation_drift_frames = 0
 
             else:
-
                 self.activation_drift_frames = 0
-
             if (
                 current_time - self.activation_start_time
             ) >= config.TOGGLE_ON_STILLNESS_SECONDS:
-
                 self.system_active = True
-
                 self.last_toggle_time = current_time
-
                 self._reset_activation_state()
-
                 print(f"System Active: {self.system_active}")
 
     def _reset_activation_state(self):
-
         self.activation_pending = False
-
         self.activation_start_time = None
-
         self.activation_anchor_x = None
-
         self.activation_anchor_y = None
-
         self.activation_drift_frames = 0
 
     def handle_volume_mode(self, img, hand_data):
-
         current_time = time.time()
-
         is_pose = detectors.is_volume_pose(hand_data)
-
         # State transition logic
-
         if is_pose:
-
             self.volume_confirm_count += 1
-
             self.volume_pose_last_seen_time = current_time
 
         else:
-
             self.volume_confirm_count = 0
-
             if self.volume_active:
-
                 if self.volume_pose_last_seen_time is None:
-
                     self.volume_pose_last_seen_time = current_time
 
                 elif (
@@ -366,7 +245,6 @@ class HandyMouseApp:
                 ):
 
                     self.volume_active = False
-
                     self.volume_pose_last_seen_time = None
 
         if (
@@ -375,45 +253,28 @@ class HandyMouseApp:
         ):
 
             self.volume_active = True
-
             self.volume_pose_last_seen_time = current_time
-
             # Initialize volume state
-
             thumb_x, thumb_y = hand_data.thumb_tip
-
             idx_x, idx_y = hand_data.index_mcp
-
             self.volume_theta_prev = np.arctan2(thumb_y - idx_y, thumb_x - idx_x)
-
             self.volume_percent_current = self.vol_ctrl.get_master_volume()
-
             self.volume_percent_applied = self.volume_percent_current
-
             self._reset_inputs()
 
         if self.volume_active:
-
             self._process_volume_control(img, hand_data)
-
             return True  # Consumed
 
         return False
 
     def _process_volume_control(self, img, hand_data):
-
         thumb_x, thumb_y = hand_data.thumb_tip
-
         idx_x, idx_y = hand_data.index_mcp
-
         theta = np.arctan2(thumb_y - idx_y, thumb_x - idx_x)
-
         delta = wrap_angle_delta(theta - self.volume_theta_prev)
-
         delta_deg = float(np.degrees(delta))
-
         if abs(delta_deg) < config.VOLUME_ANGLE_DEADZONE_DEG:
-
             delta_deg = 0.0
 
         if config.VOLUME_DIRECTION_REVERSED:
@@ -512,21 +373,57 @@ class HandyMouseApp:
 
         wrist_x, wrist_y = hand_data.wrist
 
+        # Calculate movement from the last anchored position (drag logic)
         delta_y = wrist_y - self.scroll_origin_y
-
-        distance = abs(delta_y) - config.SCROLL_DEADZONE
-
-        if distance > 0:
-
-            direction = 1 if delta_y < 0 else -1
-
-            dy = int(max(1, min(10, distance * config.SCROLL_SPEED_FACTOR))) * direction
-
-            if config.INVERT_SCROLL_DIRECTION:
-
+        delta_x = wrist_x - self.scroll_origin_x
+        
+        # Direct mapping: movement * speed_factor = scroll_clicks
+        scroll_amount_y = delta_y * config.SCROLL_SPEED_FACTOR
+        scroll_amount_x = delta_x * config.SCROLL_SPEED_FACTOR
+        
+        # Invert if needed (Standard mouse wheel: moving down (positive delta) -> scrolls down (negative steps usually?))
+        # pynput mouse.scroll(0, dy): dy>0 is up, dy<0 is down.
+        # If hand moves DOWN (positive delta_y), we want to scroll DOWN (negative dy).
+        # So we negate delta_y.
+        
+        # For Horizontal:
+        # pynput mouse.scroll(dx, 0): dx>0 is right, dx<0 is left.
+        # If hand moves RIGHT (positive delta_x), we want to scroll RIGHT (positive dx).
+        # So we KEEP delta_x (or negate if dragging content physically).
+        # Assuming "drag to scroll" means moving hand right moves content right (viewport left) -> dx < 0?
+        # "same as up/down scrolling" likely means direct "joystick" or "scroll bar" mapping.
+        # Hand Down -> Scroll Down. Hand Right -> Scroll Right.
+        
+        steps_y = int(scroll_amount_y)
+        steps_x = int(scroll_amount_x)
+        
+        dy = 0
+        dx = 0
+        
+        if steps_y != 0:
+            # Apply direction inversion preference
+            # By default: Hand Down -> Scroll Down (dy negative)
+            dy = -steps_y
+            
+            if config.INVERT_SCROLL_DIRECTION_VERTICAL:
                 dy = -dy
+                
+            # Update origin to "consume" the movement
+            consumed_pixels_y = steps_y / config.SCROLL_SPEED_FACTOR
+            self.scroll_origin_y += consumed_pixels_y
 
-            self.mouse_ctrl.scroll(dy)
+        if steps_x != 0:
+            # By default: Hand Right -> Scroll Right (dx positive)
+            dx = steps_x
+            
+            if config.INVERT_SCROLL_DIRECTION_HORIZONTAL:
+                dx = -dx
+                
+            consumed_pixels_x = steps_x / config.SCROLL_SPEED_FACTOR
+            self.scroll_origin_x += consumed_pixels_x
+
+        if dx != 0 or dy != 0:
+            self.mouse_ctrl.scroll(dx, dy)
 
         # Visuals
 
@@ -670,14 +567,34 @@ class HandyMouseApp:
             self.mouse_ctrl.rightRelease()
 
         # Left Click
-
         if is_left:
+            self.last_click_detected_time = time.time()
+            if self.long_click_start_time is None:
+                self.long_click_start_time = self.last_click_detected_time
+
+            # Check if we have entered long click mode
+            if (not self.is_long_clicking and 
+                (self.last_click_detected_time - self.long_click_start_time) >= config.LONG_CLICK_DURATION):
+                self.is_long_clicking = True
+                # Visual indicator for long click could be added here
 
             self.mouse_ctrl.leftClick()
-
         else:
-
-            self.mouse_ctrl.leftRelease()
+            # If we are in long click mode, check grace period
+            if self.is_long_clicking:
+                current_time = time.time()
+                if (current_time - self.last_click_detected_time) <= config.LONG_CLICK_RELEASE_GRACE_PERIOD:
+                    # Within grace period, maintain click
+                    pass 
+                else:
+                    # Grace period expired, release
+                    self.mouse_ctrl.leftRelease()
+                    self.is_long_clicking = False
+                    self.long_click_start_time = None
+            else:
+                # Normal release
+                self.mouse_ctrl.leftRelease()
+                self.long_click_start_time = None
 
     def _draw_status(self, img):
 
