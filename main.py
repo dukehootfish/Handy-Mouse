@@ -405,12 +405,9 @@ def main():
                         if (ring_pinch_distance < config.MIC_MUTE_DISTANCE_RATIO * palm_size and
                             middle_pinch_distance < config.MIC_MUTE_DISTANCE_RATIO * palm_size):
                             
-                            current_time = time.time()
-                            if current_time - last_mic_toggle_time > config.MIC_MUTE_COOLDOWN:
-                                vol_ctrl.mute_mic()
-                                last_mic_toggle_time = current_time
-                                # Visual feedback
-                                cv2.putText(img, "Mic Toggled", (img_w // 2 - 100, img_h // 2),
+                            vol_ctrl.mute_mic()
+                            # Visual feedback
+                            cv2.putText(img, "Mic Muted", (img_w // 2 - 100, img_h // 2),
                                             cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 3)
 
 

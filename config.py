@@ -64,4 +64,3 @@ VOLUME_DIRECTION_REVERSED = False # swap direction if needed
 
 # Mic Mute Gesture Settings
 MIC_MUTE_DISTANCE_RATIO = 0.25 # Fraction of palm size for pinch detection
-MIC_MUTE_COOLDOWN = 1.0        # Seconds between mute toggles
