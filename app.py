@@ -121,7 +121,7 @@ class HandyMouseApp:
 
                 # Process Hand
 
-                img, hand_landmarks, handedness = self.tracker.prcoess_frame(img)
+                img, hand_landmarks, handedness = self.tracker.process_frame(img)
 
                 img_h, img_w = img.shape[:2]
 
