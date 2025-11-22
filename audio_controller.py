@@ -29,6 +29,37 @@ class AudioController:
         level = max(0.0, min(1.0, level))
         self.volume.SetMasterVolumeLevelScalar(level, None)
 
+    def get_volume(self):
+        """
+        Get master volume level.
+        :return: float between 0.0 and 1.0
+        """
+        return float(self.volume.GetMasterVolumeLevelScalar())
+
+    def set_master_volume(self, percent: float):
+        """
+        Set master volume as percentage.
+        :param percent: 0.0 to 100.0
+        """
+        percent = max(0.0, min(100.0, float(percent)))
+        self.set_volume(percent / 100.0)
+
+    def get_master_volume(self) -> float:
+        """
+        Get master volume as percentage.
+        :return: 0.0 to 100.0
+        """
+        return max(0.0, min(100.0, self.get_volume() * 100.0))
+
+    def increase_volume(self, delta_percent: float):
+        """
+        Increase (or decrease) master volume by a percentage delta.
+        :param delta_percent: positive to increase, negative to decrease
+        """
+        current = self.get_master_volume()
+        target = max(0.0, min(100.0, current + float(delta_percent)))
+        self.set_master_volume(target)
+
     def mute_mic(self):
         """Mute the microphone."""
         if self.mic_volume:
@@ -44,5 +75,3 @@ class AudioController:
         if self.mic_volume:
             current_mute = self.mic_volume.GetMute()
             self.mic_volume.SetMute(not current_mute, None)
-
-

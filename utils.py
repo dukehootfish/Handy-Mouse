@@ -120,3 +120,78 @@ def is_palm_rightside_up(hand_landmarks):
         return True
     return False
     
+def are_distances_similar(distances: np.ndarray, tolerance_ratio: float) -> bool:
+    """
+    Checks whether a set of distances are roughly equal within a relative tolerance.
+
+    Args:
+        distances (np.ndarray): Array of positive distances.
+        tolerance_ratio (float): Maximum allowed (max deviation / mean).
+
+    Returns:
+        bool: True if the distances are similar, False otherwise.
+    """
+    if distances.size == 0:
+        return False
+    mean_val = float(np.mean(distances))
+    if mean_val <= 0.0:
+        return False
+    max_dev = float(np.max(np.abs(distances - mean_val)))
+    return (max_dev / mean_val) <= tolerance_ratio
+
+def angle_between_vectors_deg(v1: np.ndarray, v2: np.ndarray) -> float:
+    """
+    Computes the signed smallest angle between two 2D vectors in degrees.
+
+    Args:
+        v1 (np.ndarray): Vector 1 as [x, y].
+        v2 (np.ndarray): Vector 2 as [x, y].
+
+    Returns:
+        float: Angle in degrees in [0, 180].
+    """
+    v1 = np.asarray(v1, dtype=float)
+    v2 = np.asarray(v2, dtype=float)
+    norm1 = np.linalg.norm(v1)
+    norm2 = np.linalg.norm(v2)
+    if norm1 == 0.0 or norm2 == 0.0:
+        return 0.0
+    # Use arctan2 of cross and dot for numerical stability
+    cross = v1[0] * v2[1] - v1[1] * v2[0]
+    dot = v1[0] * v2[0] + v1[1] * v2[1]
+    angle_rad = np.abs(np.arctan2(cross, dot))
+    return float(np.degrees(angle_rad))
+
+def wrap_angle_delta(delta_rad: float) -> float:
+    """
+    Wraps an angle delta in radians to the range [-pi, pi].
+    """
+    two_pi = 2.0 * np.pi
+    wrapped = (delta_rad + np.pi) % two_pi - np.pi
+    return float(wrapped)
+
+def is_colinear_and_between(a: np.ndarray, b: np.ndarray, c: np.ndarray, tolerance: float) -> bool:
+    """
+    Checks if point b lies on the line segment a-c within an absolute tolerance.
+
+    Args:
+        a, b, c (np.ndarray): Points as [x, y].
+        tolerance (float): Absolute tolerance on (ab + bc - ac).
+
+    Returns:
+        bool: True if b is between a and c (approximately colinear).
+    """
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    c = np.asarray(c, dtype=float)
+    ab = np.linalg.norm(a - b)
+    bc = np.linalg.norm(b - c)
+    ac = np.linalg.norm(a - c)
+    return abs((ab + bc) - ac) <= tolerance
+
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    """
+    Clamps a numeric value to a given range.
+    """
+    return float(max(min_value, min(max_value, value)))
+
