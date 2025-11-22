@@ -49,7 +49,9 @@ def main():
     # Toggle state
     system_active = False
     last_toggle_time = 0
+    last_mic_toggle_time = 0
     activation_pending = False
+
     activation_start_time = None
     activation_anchor_x = None
     activation_anchor_y = None
@@ -395,6 +397,23 @@ def main():
                             mouse_ctrl.leftClick()
                         else:
                             mouse_ctrl.leftRelease()
+
+                        # Handle Mic Mute Gesture (Ring + Middle + Thumb pinch)
+                        ring_pinch_distance = np.hypot(ring_tip_x - thumb_x, ring_tip_y - thumb_y)
+                        
+                        # Check if both ring and middle are close to thumb
+                        if (ring_pinch_distance < config.MIC_MUTE_DISTANCE_RATIO * palm_size and
+                            middle_pinch_distance < config.MIC_MUTE_DISTANCE_RATIO * palm_size):
+                            
+                            current_time = time.time()
+                            if current_time - last_mic_toggle_time > config.MIC_MUTE_COOLDOWN:
+                                vol_ctrl.mute_mic()
+                                last_mic_toggle_time = current_time
+                                # Visual feedback
+                                cv2.putText(img, "Mic Toggled", (img_w // 2 - 100, img_h // 2),
+                                            cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 3)
+
+
             
             # Status Display
             status_text = "Active" if system_active else "Paused"

@@ -61,3 +61,7 @@ VOLUME_ANGLE_DEADZONE_DEG = 2.0   # ignore tiny jitter
 VOLUME_DEG_PER_PERCENT = 3.0      # degrees of rotation per 1% volume change
 VOLUME_SMOOTHING_ALPHA = 0.4      # EMA smoothing for applied volume (0..1)
 VOLUME_DIRECTION_REVERSED = False # swap direction if needed
+
+# Mic Mute Gesture Settings
+MIC_MUTE_DISTANCE_RATIO = 0.25 # Fraction of palm size for pinch detection
+MIC_MUTE_COOLDOWN = 1.0        # Seconds between mute toggles
