@@ -24,67 +24,37 @@ def is_activation_pose(hand_data):
 
 def is_volume_pose(hand_data):
     """
-    Checks for the volume control gesture.
-    Complex pose: 'L' shape with index and thumb, consistent distances from thumb to other tips.
+    Checks for the volume control gesture:
+    - All fingers but index and thumb curled.
+    - Distance between index and thumb tips small.
     """
-    # Distances thumb->each fingertip, normalized by palm_size
-    thumb_x, thumb_y = hand_data.thumb_tip
-
-    # Helper to get distance from thumb to point
-    def dist_to_thumb(pt):
-        return np.hypot(pt[0] - thumb_x, pt[1] - thumb_y)
-
-    d_ti = dist_to_thumb(hand_data.index_tip)
-    d_tm = dist_to_thumb(hand_data.middle_tip)
-    d_tr = dist_to_thumb(hand_data.ring_tip)
-    d_tp = dist_to_thumb(hand_data.pinky_tip)
-
-    ratios = np.array([d_ti, d_tm, d_tr, d_tp], dtype=float) / max(
-        1.0, hand_data.palm_size
+    # Check curled fingers (Middle, Ring, Pinky)
+    curl_thresh = hand_data.palm_size * config.VOLUME_CURL_RATIO
+    others_curled = (
+        hand_data.middle_to_wrist_dist < curl_thresh
+        and hand_data.ring_to_wrist_dist < curl_thresh
+        and hand_data.pinky_to_wrist_dist < curl_thresh
     )
 
-    near_bounds_ok = np.all(
-        (ratios >= config.VOLUME_NEAR_MIN_RATIO)
-        & (ratios <= config.VOLUME_NEAR_MAX_RATIO)
-    )
-    equal_ok = are_distances_similar(ratios, config.VOLUME_EQUALITY_TOL)
+    if not others_curled:
+        return False
 
-    # Colinearity and ordering: index_tip - index_mcp - thumb_tip on a line
-    # Vectors relative to Index MCP
-    index_mcp_x, index_mcp_y = hand_data.index_mcp
-
-    v_index = np.array(
-        [hand_data.index_tip[0] - index_mcp_x, hand_data.index_tip[1] - index_mcp_y],
-        dtype=float,
+    # Check pinch distance
+    pinch_dist = np.hypot(
+        hand_data.index_tip[0] - hand_data.thumb_tip[0],
+        hand_data.index_tip[1] - hand_data.thumb_tip[1]
     )
-    v_thumb = np.array([thumb_x - index_mcp_x, thumb_y - index_mcp_y], dtype=float)
+    
+    min_dist = hand_data.palm_size * config.VOLUME_PINCH_MIN_RATIO
+    max_dist = hand_data.palm_size * config.VOLUME_PINCH_RATIO
+    
+    is_pinch = min_dist < pinch_dist < max_dist
 
-    angle_deg = angle_between_vectors_deg(v_index, v_thumb)
-    colinear_angle_ok = angle_deg >= 150.0
+    # Index should not be fully curled (to distinguish from fist)
+    # In a pinch, index is bent but tip is usually further than curled fingers
+    index_not_curled = hand_data.index_to_wrist_dist > (curl_thresh * 0.8)
 
-    between_ok = is_colinear_and_between(
-        np.array(hand_data.index_tip, dtype=float),
-        np.array(hand_data.index_mcp, dtype=float),
-        np.array(hand_data.thumb_tip, dtype=float),
-        tolerance=config.VOLUME_LINE_TOL * hand_data.palm_size,
-    )
-
-    # Thumb below and horizontally near index MCP
-    vertical_ok = thumb_y > (
-        index_mcp_y + config.VOLUME_MIN_VERTICAL_DIFF * hand_data.palm_size
-    )
-    horizontal_ok = (
-        abs(thumb_x - index_mcp_x) <= config.VOLUME_HORIZONTAL_TOL * hand_data.palm_size
-    )
-
-    return (
-        near_bounds_ok
-        and equal_ok
-        and colinear_angle_ok
-        and between_ok
-        and vertical_ok
-        and horizontal_ok
-    )
+    return is_pinch and index_not_curled
 
 
 def is_fist(hand_data):

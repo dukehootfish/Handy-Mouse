@@ -10,7 +10,7 @@ from core.condition import condition
 def check_cursor(hand_data, img, time_now, context):
     if not context.flags.SYSTEM_ACTIVE:
         return False, {}
-    if context.flags.SCROLL_ACTIVE or context.flags.VOLUME_ACTIVE:
+    if context.flags.SCROLL_ACTIVE:
         return False, {}
     if hasattr(context, 'frame_consumed') and context.frame_consumed:
         return False, {}

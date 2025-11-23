@@ -15,7 +15,6 @@ from core.condition import ConditionRegistry
 # Import features to register conditions
 import features.activation
 import features.scroll
-import features.volume
 import features.mic_toggle
 import features.cursor
 
@@ -59,8 +58,11 @@ class HandyMouseApp:
                         for cond in conditions:
                             # The condition wrapper itself is callable and holds the event func
                             should_run, data = cond(hand_data, img, time_now, self.context)
-                            if should_run and cond.event_func:
-                                cond.event_func(self.context, data)
+                            if should_run:
+                                if cond.event_func:
+                                    cond.event_func(self.context, data)
+                                if cond.halt_following:
+                                    break
 
                 # Status Display
                 self._draw_status(img)

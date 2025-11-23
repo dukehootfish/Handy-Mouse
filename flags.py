@@ -3,7 +3,6 @@ class HandyFlags:
         # Main System Flags
         self.SYSTEM_ACTIVE = False
         self.SCROLL_ACTIVE = False
-        self.VOLUME_ACTIVE = False
         self.LONG_CLICK_ACTIVE = False
         
         # Activation State
@@ -18,13 +17,6 @@ class HandyFlags:
         self.SCROLL_ORIGIN_X = None
         self.SCROLL_ORIGIN_Y = None
         self.LAST_FIST_TIME = None
-        
-        # Volume State
-        self.VOLUME_CONFIRM_COUNT = 0
-        self.VOLUME_POSE_LAST_SEEN_TIME = None
-        self.VOLUME_THETA_PREV = 0.0
-        self.VOLUME_PERCENT_CURRENT = 0.0
-        self.VOLUME_PERCENT_APPLIED = None
         
         # Mic State
         self.MIC_MUTE_HANDLED = False

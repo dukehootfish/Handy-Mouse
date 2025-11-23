@@ -58,38 +58,12 @@ FIST_DETECTION_LEEWAY = 0.1
 # Seconds to wait before ending scroll mode if fist is lost
 
 # Volume Gesture Settings
-
-# Distances between thumb tip and other fingertips should be near and similar
-VOLUME_NEAR_MIN_RATIO = 0.15  
-# * palm_size
-VOLUME_NEAR_MAX_RATIO = 0.35  
-# * palm_size
-VOLUME_EQUALITY_TOL = 0.15  
-# max deviation from mean / mean
-VOLUME_LINE_TOL = 0.10  
-# absolute tolerance as ratio of palm_size for colinearity check
-
-# Thumb relation to index MCP
-VOLUME_MIN_VERTICAL_DIFF = 0.06  
-# * palm_size (thumb below index MCP by at least this)
-VOLUME_HORIZONTAL_TOL = 0.25  
-# * palm_size (thumb horizontally close to index MCP)
-
-# Pose entry/exit timing
-VOLUME_ENTER_CONFIRM_FRAMES = 5  
-# consecutive frames to enter
-VOLUME_EXIT_LEEWAY = 0.15  
-# seconds to tolerate pose loss before exit
-
-# Rotation to volume mapping
-VOLUME_ANGLE_DEADZONE_DEG = 2.0  
-# ignore tiny jitter
-VOLUME_DEG_PER_PERCENT = 3.0  
-# degrees of rotation per 1% volume change
-VOLUME_SMOOTHING_ALPHA = 0.4  
-# EMA smoothing for applied volume (0..1)
-VOLUME_DIRECTION_REVERSED = False  
-# swap direction if needed
+VOLUME_PINCH_RATIO = 0.25  
+# Max distance between thumb and index tip as fraction of palm size
+VOLUME_PINCH_MIN_RATIO = 0.05
+# Min distance between thumb and index tip (to avoid pinch)
+VOLUME_CURL_RATIO = 1.2   
+# Max distance for curled fingers (middle, ring, pinky) as fraction of palm size
 
 # Mic Mute Gesture Settings
 MIC_TOGGLE_DISTANCE_RATIO = 0.25  
