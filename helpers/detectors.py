@@ -1,6 +1,6 @@
 import numpy as np
 import config
-from utils import (
+from .utils import (
     are_distances_similar,
     angle_between_vectors_deg,
     is_colinear_and_between,
