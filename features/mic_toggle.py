@@ -10,6 +10,8 @@ def check_mic_mute(hand_data, img, time_now, context):
         return False, {}
     if context.flags.SCROLL_ACTIVE:
         return False, {}
+    if not getattr(hand_data, "is_main", False):
+        return False, {}
         
     is_mute = detectors.is_mic_mute(hand_data)
     

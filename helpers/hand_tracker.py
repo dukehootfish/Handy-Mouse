@@ -8,7 +8,7 @@ initializing and using MediaPipe's Hand tracking solution.
 import mediapipe as mp
 import cv2
 import numpy as np
-from typing import Tuple, Optional, NamedTuple
+from typing import Tuple, List, NamedTuple
 
 class HandTracker:
     """
@@ -38,7 +38,9 @@ class HandTracker:
             min_tracking_confidence=min_tracking_confidence
         )
 
-    def process_frame(self, img: np.ndarray) -> Tuple[np.ndarray, Optional[NamedTuple], Optional[NamedTuple]]:
+    def process_frame(
+        self, img: np.ndarray
+    ) -> Tuple[np.ndarray, List[NamedTuple], List[NamedTuple]]:
         """
         Process a single video frame to detect hands.
 
@@ -46,29 +48,29 @@ class HandTracker:
             img (np.ndarray): The input image (BGR format from OpenCV).
 
         Returns:
-            Tuple[np.ndarray, Optional[NamedTuple], Optional[NamedTuple]]: 
-                - The processed image (BGR) with landmarks drawn (if any).
-                - The first detected hand landmarks object, or None if no hand is detected.
-                - The handedness classification (Left/Right) of the first hand, or None.
+            Tuple[np.ndarray, List[NamedTuple], List[NamedTuple]]:
+                - The processed image (BGR).
+                - Detected hand landmarks objects (possibly empty).
+                - The handedness classification entries for the detected hands.
         """
         # Convert the BGR image to RGB before processing.
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = self.hands.process(img_rgb)
 
-        hand_landmarks = None
-        handedness = None
+        hand_landmarks = results.multi_hand_landmarks or []
+        handedness = results.multi_handedness or []
 
-        if results.multi_hand_landmarks:
-            # For this app, we only care about the first hand detected (index 0)
-            hand_landmarks = results.multi_hand_landmarks[0]
-            
-            if results.multi_handedness:
-                handedness = results.multi_handedness[0]
-            
-            self.mp_drawing.draw_landmarks(
-                img, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+        return img, list(hand_landmarks), list(handedness)
 
-        return img, hand_landmarks, handedness
+    def draw_landmarks(self, img: np.ndarray, hand_landmarks, color: Tuple[int, int, int]):
+        drawing_spec = self.mp_drawing.DrawingSpec(color=color, thickness=2, circle_radius=2)
+        self.mp_drawing.draw_landmarks(
+            img,
+            hand_landmarks,
+            self.mp_hands.HAND_CONNECTIONS,
+            drawing_spec,
+            drawing_spec,
+        )
 
     def get_landmark_pos(self, hand_landmarks, landmark_idx: int, img_shape: Tuple[int, int]) -> Tuple[int, int]:
         """

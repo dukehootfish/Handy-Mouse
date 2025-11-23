@@ -8,5 +8,5 @@ class HandyContext:
         self.flags = HandyFlags()
         self.mouse = MouseController()
         self.audio = AudioController()
-        self.tracker = HandTracker(max_num_hands=1)
+        self.tracker = HandTracker(max_num_hands=2)
 

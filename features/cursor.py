@@ -12,6 +12,8 @@ def check_cursor(hand_data, img, time_now, context):
         return False, {}
     if context.flags.SCROLL_ACTIVE:
         return False, {}
+    if not getattr(hand_data, "is_main", False):
+        return False, {}
     if hasattr(context, 'frame_consumed') and context.frame_consumed:
         return False, {}
         

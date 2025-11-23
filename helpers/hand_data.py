@@ -6,9 +6,11 @@ class HandData:
     Encapsulates hand landmark data and provides helper properties/methods
     for gesture detection.
     """
-    def __init__(self, hand_landmarks, img_shape):
+    def __init__(self, hand_landmarks, img_shape, label=None, is_main=False):
         self.landmarks = hand_landmarks
         self.img_h, self.img_w = img_shape
+        self.label = label
+        self.is_main = is_main
         
         # Cache for computed positions to avoid re-calculation
         self._positions = {}

@@ -8,6 +8,8 @@ from core.condition import condition
 def check_scroll(hand_data, img, time_now, context):
     if not context.flags.SYSTEM_ACTIVE:
         return False, {}
+    if not getattr(hand_data, "is_main", False):
+        return False, {}
         
     is_fist = detectors.is_fist(hand_data)
     
