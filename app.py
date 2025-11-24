@@ -48,12 +48,17 @@ class HandyMouseApp:
                 if hand_landmarks_list:
                     time_now = time.time()
                     conditions = ConditionRegistry.get_all()
+                    processed_labels = set()  # Ensure at most one Left/Right is processed per frame
                     for idx, hand_landmarks in enumerate(hand_landmarks_list):
                         if getattr(self.context, "frame_consumed", False):
                             break
 
                         handedness_info = handedness_list[idx] if idx < len(handedness_list) else None
                         label = self._get_hand_label(handedness_info, idx)
+                        canonical_label = label if label in ("Left", "Right") else None
+                        if canonical_label and canonical_label in processed_labels:
+                            continue
+
                         palm_ok, upright_ok = self._hand_orientation_status(
                             img, hand_landmarks, handedness_info, label, idx
                         )
@@ -64,9 +69,10 @@ class HandyMouseApp:
                         if not orientation_ok:
                             continue
 
-                        processed_hand = True
+                        if canonical_label:
+                            processed_labels.add(canonical_label)
 
-                        canonical_label = label if label in ("Left", "Right") else None
+                        processed_hand = True
 
                         hand_data = HandData(
                             hand_landmarks,
