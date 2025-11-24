@@ -182,7 +182,12 @@ class HandyMouseApp:
 
     def _get_hand_label(self, handedness_info, idx):
         if handedness_info and handedness_info.classification:
-            return handedness_info.classification[0].label
+            label = handedness_info.classification[0].label
+            if label == "Left":
+                return "Right"
+            elif label == "Right":
+                return "Left"
+            return label
         return f"Hand {idx + 1}"
 
     def _hand_orientation_status(self, img, landmarks, handedness_info, label, index):
