@@ -50,6 +50,10 @@ class HandyFlags:
         self.MOUSE_LOCATION = None
         self.IS_FIRST_DETECTION = True
 
+        # Exit Gesture State (Both Fists Closed)
+        self.DOUBLE_FIST_START_TIME = None
+        self.EXIT_REQUESTED = False
+
     def get_hand_state(self, label):
         if label not in self.HAND_STATES:
             self.HAND_STATES[label] = HandActivationState(label)

@@ -17,6 +17,7 @@ import features.activation
 import features.scroll
 import features.mic_toggle
 import features.cursor
+import features.exit_gesture
 
 class HandyMouseApp:
 
@@ -44,6 +45,10 @@ class HandyMouseApp:
                 img, hand_landmarks_list, handedness_list = self.context.tracker.process_frame(img)
                 img_h, img_w = img.shape[:2]
                 processed_hand = False
+
+                # Store frame data in context for multi-hand conditions
+                self.context.frame_landmarks = hand_landmarks_list
+                self.context.frame_handedness = handedness_list
 
                 if hand_landmarks_list:
                     time_now = time.time()
@@ -94,6 +99,11 @@ class HandyMouseApp:
 
                 if hand_landmarks_list and not processed_hand:
                     self._reset_inputs()
+
+                # Check for exit request from gesture
+                if self.context.flags.EXIT_REQUESTED:
+                    print("Exit requested via double fist gesture.")
+                    break
 
                 # Status Display
                 self._draw_status(img)

@@ -70,3 +70,7 @@ MIC_TOGGLE_DISTANCE_RATIO = 0.25
 # Fraction of palm size for pinch detection
 MIC_TOGGLE_COOLDOWN = 2.0  
 # Seconds to wait between toggles
+
+# Exit Gesture Settings (Two-Handed Mode)
+DOUBLE_FIST_EXIT_DURATION = 1.0  
+# Seconds to hold both fists closed to exit HandyMouse

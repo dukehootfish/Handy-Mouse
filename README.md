@@ -15,7 +15,7 @@ The project has been refactored into modular components:
 
 - `main.py`: The entry point of the application. Handles the main loop and video processing.
 - `hand_tracker.py`: Handles MediaPipe initialization and hand landmark extraction.
-- `mouse_controller.py`: Manages mouse movement and clicking using `pynput` and `wxPython`.
+- `mouse_controller.py`: Manages mouse movement and clicking using `pynput`.
 - `config.py`: Contains configuration constants (camera resolution, thresholds, etc.).
 - `utils.py`: Helper functions (e.g., movement stability check).
 

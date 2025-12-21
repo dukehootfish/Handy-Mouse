@@ -5,7 +5,7 @@ This module handles the interaction with the system mouse, including movement
 and clicking, based on coordinates provided by the tracking system.
 """
 
-import wx
+import ctypes
 import numpy as np
 from pynput.mouse import Button, Controller
 from config import SCREEN_MAPPING_WIDTH_DIVISOR, SCREEN_MAPPING_HEIGHT_DIVISOR
@@ -20,11 +20,12 @@ class MouseController:
         Initialize the MouseController.
         
         Sets up the pynput mouse controller and retrieves the screen size
-        using wxPython.
+        using ctypes.
         """
         self.mouse = Controller()
-        self.app = wx.App(False)
-        self.screen_width, self.screen_height = wx.GetDisplaySize()
+        user32 = ctypes.windll.user32
+        self.screen_width = user32.GetSystemMetrics(0)
+        self.screen_height = user32.GetSystemMetrics(1)
         self.pressed = False
         self.left_pressed = False
         self.right_pressed = False
