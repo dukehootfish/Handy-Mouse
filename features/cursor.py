@@ -46,7 +46,11 @@ def move_cursor_event(context, data):
         current_raw, context.flags.MOUSE_LOCATION, config.SMOOTHING_FACTOR
     )
     
-    context.mouse.move_to(context.flags.MOUSE_LOCATION)
+    context.mouse.move_to(
+        context.flags.MOUSE_LOCATION,
+        getattr(context, 'cam_width', 1280),
+        getattr(context, 'cam_height', 720)
+    )
     
     # Handle Clicks
     handle_clicks(context, img, hand_data, time_now)

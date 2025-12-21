@@ -30,22 +30,25 @@ class MouseController:
         self.left_pressed = False
         self.right_pressed = False
 
-    def move_to(self, location: np.ndarray):
+    def move_to(self, location: np.ndarray, cam_width: int = 1280, cam_height: int = 720):
         """
         Moves the mouse cursor to a mapped position on the screen.
 
         The logic maps the camera coordinates to screen coordinates.
-        Note: The original logic inverted the X axis and scaled Y.
+        CURSOR_SPEED controls how much hand movement maps to cursor movement.
         
         Args:
             location (np.ndarray): The (x, y) coordinates from the tracker.
+            cam_width (int): Camera frame width for coordinate mapping.
+            cam_height (int): Camera frame height for coordinate mapping.
         """
-        # Mapping logic from original script:
-        # sx - (mouse_location[0] * sx / 1200)
-        # mouse_location[1] * sy / 675
+        speed = config.CURSOR_SPEED
         
-        target_x = self.screen_width - (location[0] * self.screen_width / config.SCREEN_MAPPING_WIDTH_DIVISOR)
-        target_y = location[1] * self.screen_height / config.SCREEN_MAPPING_HEIGHT_DIVISOR
+        # Map camera coordinates to screen, with speed multiplier
+        # Speed > 1: less hand movement covers more screen (faster)
+        # Speed < 1: more hand movement needed (slower/more precise)
+        target_x = self.screen_width - (location[0] * self.screen_width * speed / cam_width)
+        target_y = location[1] * self.screen_height * speed / cam_height
         
         self.mouse.position = (target_x, target_y)
 

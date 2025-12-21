@@ -192,7 +192,11 @@ def zoom_handler(context, data):
                 context.flags.ZOOM_PAN_POINT * smoothing
                 + target_pos * (1 - smoothing)
             )
-        context.mouse.move_to(context.flags.ZOOM_PAN_POINT)
+        context.mouse.move_to(
+            context.flags.ZOOM_PAN_POINT,
+            getattr(context, 'cam_width', 1280),
+            getattr(context, 'cam_height', 720)
+        )
 
     elif mode == "halt":
         # Intentionally blank – ensures lower-priority conditions don't move the cursor.

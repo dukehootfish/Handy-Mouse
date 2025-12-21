@@ -13,13 +13,12 @@
     "LONG_CLICK_RELEASE_GRACE_PERIOD": { "value": 0.1, "range": [0.0, 2.0], "description": "Grace period (seconds) after losing tracking before releasing Long Click" },
     "MOVEMENT_STABILITY_RATIO": { "value": 0.05, "range": [0.0, 1.0], "description": "Ratio of palm size for movement stability threshold" },
     "SMOOTHING_FACTOR": { "value": 0.25, "range": [0.01, 1.0], "description": "Cursor smoothing factor (Lower = smoother but more latency)" },
-    "TOGGLE_COOLDOWN": { "value": 0.5, "range": [0.0, 10.0], "description": "Cooldown (seconds) between toggle gestures" },
+    "TOGGLE_COOLDOWN": { "value": 2.0, "range": [0.0, 10.0], "description": "Cooldown (seconds) between toggle gestures" },
     "TOGGLE_ON_STILLNESS_SECONDS": { "value": 1.0, "range": [0.0, 5.0], "description": "Duration (seconds) to hold activation gesture still" },
     "TOGGLE_ON_WIGGLE_RATIO": { "value": 0.12, "range": [0.0, 1.0], "description": "Allowed movement ratio during activation hold" },
     "TOGGLE_ON_WIGGLE_MIN_PX": { "value": 18.0, "range": [0.0, 100.0], "description": "Minimum allowed pixel movement during activation hold" },
     "TOGGLE_ON_DRIFT_FRAMES": { "value": 3, "range": [0, 60], "description": "Max frames allowed to drift during activation" },
-    "SCREEN_MAPPING_WIDTH_DIVISOR": { "value": 1200, "range": null, "description": "Divisor for mapping camera width to screen coordinates" },
-    "SCREEN_MAPPING_HEIGHT_DIVISOR": { "value": 675, "range": null, "description": "Divisor for mapping camera height to screen coordinates" },
+    "CURSOR_SPEED": { "value": 1.5, "range": [0.1, 5.0], "description": "Cursor speed multiplier (Higher = faster, less hand movement needed)" },
     "INVERT_SCROLL_DIRECTION_VERTICAL": { "value": true, "range": [true, false], "description": "Invert vertical scroll direction" },
     "INVERT_SCROLL_DIRECTION_HORIZONTAL": { "value": false, "range": [true, false], "description": "Invert horizontal scroll direction" },
     "SCROLL_SPEED_FACTOR": { "value": 0.05, "range": [0.001, 2.0], "description": "Scroll speed multiplier" },
@@ -29,5 +28,6 @@
     "VOLUME_CURL_RATIO": { "value": 1.2, "range": [0.0, 2.0], "description": "Curl threshold ratio for volume gesture" },
     "MIC_TOGGLE_DISTANCE_RATIO": { "value": 0.25, "range": [0.0, 1.0], "description": "Pinch distance ratio for Mic Toggle" },
     "MIC_TOGGLE_COOLDOWN": { "value": 2.0, "range": [0.0, 10.0], "description": "Cooldown (seconds) between mic toggles" },
-    "DOUBLE_FIST_EXIT_DURATION": { "value": 1.0, "range": [0.0, 10.0], "description": "Duration (seconds) to hold double fist to exit" }
+    "DOUBLE_FIST_EXIT_DURATION": { "value": 1.0, "range": [0.0, 10.0], "description": "Duration (seconds) to hold double fist to exit" },
+    "NUMBER_OF_CONSECUTIVE_NULL_FRAMES_TO_EXIT": { "value": 30, "range": [1, 100], "description": "Number of consecutive errored camera frames to exit the application" }
 }
