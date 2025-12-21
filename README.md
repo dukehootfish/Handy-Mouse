@@ -16,7 +16,6 @@ HandyMouse is a Python application that allows you to control your computer mous
 - **Scroll**: Make a **Fist** and move your hand to drag the page.
 
 ### 🔍 Advanced Gestures
-- **Zoom**: Pinch with **BOTH hands** simultaneously. Move hands apart to zoom in, together to zoom out.
 - **Mic Toggle**: Pinch **Thumb**, **Middle**, and **Ring** fingers together (quiet coyote).
 - **Exit App**:
   - Press `Esc` key.

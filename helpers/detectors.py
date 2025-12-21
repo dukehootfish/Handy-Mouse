@@ -1,5 +1,5 @@
 import numpy as np
-import config
+from config_manager import config
 from .utils import (
     are_distances_similar,
     angle_between_vectors_deg,

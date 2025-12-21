@@ -8,7 +8,7 @@ and clicking, based on coordinates provided by the tracking system.
 import ctypes
 import numpy as np
 from pynput.mouse import Button, Controller
-from config import SCREEN_MAPPING_WIDTH_DIVISOR, SCREEN_MAPPING_HEIGHT_DIVISOR
+from config_manager import config
 
 class MouseController:
     """
@@ -44,8 +44,8 @@ class MouseController:
         # sx - (mouse_location[0] * sx / 1200)
         # mouse_location[1] * sy / 675
         
-        target_x = self.screen_width - (location[0] * self.screen_width / SCREEN_MAPPING_WIDTH_DIVISOR)
-        target_y = location[1] * self.screen_height / SCREEN_MAPPING_HEIGHT_DIVISOR
+        target_x = self.screen_width - (location[0] * self.screen_width / config.SCREEN_MAPPING_WIDTH_DIVISOR)
+        target_y = location[1] * self.screen_height / config.SCREEN_MAPPING_HEIGHT_DIVISOR
         
         self.mouse.position = (target_x, target_y)
 

@@ -6,7 +6,7 @@ This file initializes and runs the HandyMouse application using the Conditions/E
 
 import cv2
 import time
-import config
+from config_manager import config
 from context import HandyContext
 from helpers.hand_data import HandData
 from helpers.utils import is_palm_facing_camera, is_palm_rightside_up
@@ -26,8 +26,26 @@ class HandyMouseApp:
 
         # Video Capture
         self.video_cap = cv2.VideoCapture(0)
-        self.video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
-        self.video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
+        # Try to use config resolution if available, otherwise it will default to camera native
+        if hasattr(config, 'CAM_WIDTH') and hasattr(config, 'CAM_HEIGHT'):
+             self.video_cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
+             self.video_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
+        
+        # Read actual resolution from camera
+        self.cam_width = int(self.video_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.cam_height = int(self.video_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print(f"Camera Resolution: {self.cam_width}x{self.cam_height}")
+        
+        # Update context/config with actual values if needed, or just store them
+        # Ideally, we update the config object in memory so other parts use the correct values
+        config.CAM_WIDTH = self.cam_width
+        config.CAM_HEIGHT = self.cam_height
+
+        # Update screen mapping divisors to match camera resolution if they were hardcoded to 1200/675
+        # This preserves the original logic's ratio but scales it to the actual camera resolution
+        # Original: 1200 (~93% of 1280), 675 (~93% of 720)
+        config.SCREEN_MAPPING_WIDTH_DIVISOR = int(self.cam_width * (1200/1280))
+        config.SCREEN_MAPPING_HEIGHT_DIVISOR = int(self.cam_height * (675/720))
 
     def run(self):
         print("HandyMouse started. Press 'Esc' to exit.")

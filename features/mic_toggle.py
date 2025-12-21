@@ -1,7 +1,7 @@
 import time
 import cv2
 from helpers import detectors
-import config
+from config_manager import config
 from core.condition import condition
 
 @condition(priority=3)

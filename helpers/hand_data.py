@@ -1,5 +1,5 @@
 import numpy as np
-import config
+from config_manager import config
 
 class HandData:
     """

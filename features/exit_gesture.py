@@ -7,7 +7,7 @@ and requests application exit (equivalent to pressing ESC).
 import cv2
 from helpers import detectors
 from helpers.hand_data import HandData
-import config
+from config_manager import config
 from core.condition import condition
 
 

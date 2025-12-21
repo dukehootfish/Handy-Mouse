@@ -1,5 +1,5 @@
 import numpy as np
-import config
+from config_manager import config
 from core.condition import condition
 from helpers.hand_data import HandData
 from pynput.keyboard import Key, Controller

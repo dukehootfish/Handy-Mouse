@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 from helpers import detectors
-import config
+from config_manager import config
 from helpers.utils import smooth_position
 from core.condition import condition
 
