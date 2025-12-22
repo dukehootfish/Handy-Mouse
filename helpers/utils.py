@@ -3,6 +3,9 @@ Utility functions for the HandyMouse application.
 """
 
 import numpy as np
+import sys
+import os
+import ctypes
 
 
 def smooth_position(target_pos: np.ndarray, current_pos: np.ndarray, alpha: float = 0.5) -> np.ndarray:
@@ -37,21 +40,6 @@ def is_palm_facing_camera(hand_landmarks, handedness_info):
     if not handedness_info:
         return True # Default to True if uncertain to avoid locking out
         
-    # MediaPipe Handedness:
-    # Label is 'Left' or 'Right'. 
-    # NOTE: MediaPipe assumes input is mirrored by default for 'Left'/'Right' labels 
-    # if using front camera, but let's check the standard behavior.
-    # For a standard webcam view (mirrored):
-    # - Real Right Hand shows up as "Right" label (usually).
-    # 
-    # Palm Facing Camera Logic:
-    # X coordinates increase from left to right.
-    # Right Hand (Palm): Thumb (Left) < Index < Pinky (Right) => Index.x < Pinky.x
-    # Left Hand (Palm): Pinky (Left) < Index < Thumb (Right) => Pinky.x < Index.x
-    #
-    # If Back of Hand is showing:
-    # Right Hand (Back): Pinky (Left) < Index < Thumb (Right) => Pinky.x < Index.x
-    # Left Hand (Back): Thumb (Left) < Index < Pinky (Right) => Index.x < Pinky.x
     
     label = handedness_info.classification[0].label # "Left" or "Right"
     
@@ -176,4 +164,23 @@ def clamp(value: float, min_value: float, max_value: float) -> float:
     Clamps a numeric value to a given range.
     """
     return float(max(min_value, min(max_value, value)))
+
+def set_high_priority():
+    """ Set the priority of the process to high. """
+    try:
+        sys.getwindowsversion()
+    except AttributeError:
+        # Not on Windows
+        return
+
+    # HIGH_PRIORITY_CLASS = 0x00000080
+    # ABOVE_NORMAL_PRIORITY_CLASS = 0x00008000
+    pid = os.getpid()
+    handle = ctypes.windll.kernel32.OpenProcess(0x0100, False, pid) # PROCESS_SET_INFORMATION
+    if handle:
+        ctypes.windll.kernel32.SetPriorityClass(handle, 0x00000080)
+        ctypes.windll.kernel32.CloseHandle(handle)
+        print("Process priority set to HIGH.")
+    else:
+        print("Failed to set process priority.")
 
