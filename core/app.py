@@ -39,7 +39,6 @@ class HandyMouseApp:
         self.context.cam_width = self.cam_width
         self.context.cam_height = self.cam_height
         
-        self.last_width_print_time = 0
         self.consecutive_failures = 0
 
     def process_frame(self):
@@ -75,12 +74,6 @@ class HandyMouseApp:
 
         if hand_landmarks_list:
             time_now = time.time()
-            
-            should_print_width = False
-            if time_now - self.last_width_print_time >= 1.0:
-                should_print_width = True
-                self.last_width_print_time = time_now
-
             conditions = ConditionRegistry.get_all()
             processed_labels = set()  # Ensure at most one Left/Right is processed per frame
             for idx, hand_landmarks in enumerate(hand_landmarks_list):
@@ -91,11 +84,6 @@ class HandyMouseApp:
                 world_landmarks = world_landmarks_list[idx] if idx < len(world_landmarks_list) else None
                 label = self._get_hand_label(handedness_info, idx)
                 
-                # Measure and print palm width if due
-                if should_print_width:
-                    width = measure_true_palm_width(hand_landmarks, world_landmarks, img.shape)
-                    print(f"Hand {idx} ({label or 'Unknown'}) Palm Width: {width:.2f} px")
-
                 canonical_label = label if label in ("Left", "Right") else None
                 if canonical_label and canonical_label in processed_labels:
                     continue
