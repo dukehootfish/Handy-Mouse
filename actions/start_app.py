@@ -2,7 +2,7 @@
 Action to start the HandyMouse application.
 """
 
-from app import HandyMouseApp
+from core.app import HandyMouseApp
 from helpers.utils import set_high_priority
 
 

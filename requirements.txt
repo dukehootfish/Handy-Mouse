@@ -4,4 +4,4 @@ pynput
 opencv-contrib-python
 comtypes
 pycaw
-
+PySide6

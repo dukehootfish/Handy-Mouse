@@ -1,5 +1,5 @@
 import numpy as np
-from config_manager import config
+from core.config_manager import config
 from .utils import (
     are_distances_similar,
     angle_between_vectors_deg,
@@ -20,41 +20,6 @@ def is_activation_pose(hand_data):
         > hand_data.palm_size * 1.2  # Pinky is naturally shorter
     )
     return ring_curled and others_extended
-
-
-def is_volume_pose(hand_data):
-    """
-    Checks for the volume control gesture:
-    - All fingers but index and thumb curled.
-    - Distance between index and thumb tips small.
-    """
-    # Check curled fingers (Middle, Ring, Pinky)
-    curl_thresh = hand_data.palm_size * config.VOLUME_CURL_RATIO
-    others_curled = (
-        hand_data.middle_to_wrist_dist < curl_thresh
-        and hand_data.ring_to_wrist_dist < curl_thresh
-        and hand_data.pinky_to_wrist_dist < curl_thresh
-    )
-
-    if not others_curled:
-        return False
-
-    # Check pinch distance
-    pinch_dist = np.hypot(
-        hand_data.index_tip[0] - hand_data.thumb_tip[0],
-        hand_data.index_tip[1] - hand_data.thumb_tip[1]
-    )
-    
-    min_dist = hand_data.palm_size * config.VOLUME_PINCH_MIN_RATIO
-    max_dist = hand_data.palm_size * config.VOLUME_PINCH_RATIO
-    
-    is_pinch = min_dist < pinch_dist < max_dist
-
-    # Index should not be fully curled (to distinguish from fist)
-    # In a pinch, index is bent but tip is usually further than curled fingers
-    index_not_curled = hand_data.index_to_wrist_dist > (curl_thresh * 0.8)
-
-    return is_pinch and index_not_curled
 
 
 def is_fist(hand_data):

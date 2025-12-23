@@ -1,7 +1,7 @@
 import time
 import cv2
 from helpers import detectors
-from config_manager import config
+from core.config_manager import config
 from core.condition import condition
 
 @condition(priority=1)
@@ -53,9 +53,6 @@ def manage_scroll_event(context, data):
 def process_scroll(context, img, hand_data):
     wrist_x, wrist_y = hand_data.wrist
 
-    # Calculate movement from the last anchored position (drag logic)
-    # Note: context.flags.SCROLL_ORIGIN variables are used
-    
     delta_y = wrist_y - context.flags.SCROLL_ORIGIN_Y
     delta_x = wrist_x - context.flags.SCROLL_ORIGIN_X
     
@@ -87,7 +84,6 @@ def process_scroll(context, img, hand_data):
     if dx != 0 or dy != 0:
         context.mouse.scroll(dx, dy)
 
-    # Visuals
     if context.flags.SCROLL_ORIGIN_X is not None:
         origin_pt = (int(context.flags.SCROLL_ORIGIN_X), int(context.flags.SCROLL_ORIGIN_Y))
         current_pt = (int(context.flags.SCROLL_ORIGIN_X), int(wrist_y))

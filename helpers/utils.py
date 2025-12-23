@@ -42,7 +42,6 @@ def is_palm_facing_camera(hand_landmarks, handedness_info):
         
     
     label = handedness_info.classification[0].label # "Left" or "Right"
-    
     # Landmark indices
     INDEX_MCP = 5
     PINKY_MCP = 17
@@ -62,7 +61,6 @@ def is_palm_facing_camera(hand_landmarks, handedness_info):
             is_palm = True
 
     # When the hand is upside down, MediaPipe's handedness logic appears flipped.
-    # In that case, invert the palm assumption so gestures remain intuitive.
     if hand_landmarks and not is_palm_rightside_up(hand_landmarks):
         is_palm = not is_palm
             
@@ -173,8 +171,6 @@ def set_high_priority():
         # Not on Windows
         return
 
-    # HIGH_PRIORITY_CLASS = 0x00000080
-    # ABOVE_NORMAL_PRIORITY_CLASS = 0x00008000
     pid = os.getpid()
     handle = ctypes.windll.kernel32.OpenProcess(0x0100, False, pid) # PROCESS_SET_INFORMATION
     if handle:

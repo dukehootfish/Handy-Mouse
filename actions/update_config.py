@@ -2,7 +2,7 @@
 Action to update configuration values.
 """
 
-from config_manager import config
+from core.config_manager import config
 
 
 def action(connector, key, value):

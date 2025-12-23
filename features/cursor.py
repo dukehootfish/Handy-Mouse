@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 from helpers import detectors
-from config_manager import config
+from core.config_manager import config
 from helpers.utils import smooth_position
 from core.condition import condition
 
@@ -104,7 +104,6 @@ def handle_clicks(context, img, hand_data, time_now):
         if (not context.flags.LONG_CLICK_ACTIVE and 
             (context.flags.LAST_CLICK_DETECTED_TIME - context.flags.LONG_CLICK_START_TIME) >= config.LONG_CLICK_DURATION):
             context.flags.LONG_CLICK_ACTIVE = True
-            # Visual indicator for long click could be added here
 
         context.mouse.leftClick()
     else:

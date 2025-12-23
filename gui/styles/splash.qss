@@ -1,0 +1,24 @@
+/* Splash Screen Stylesheet */
+
+SplashScreen {
+    background-color: #0a0a0a;
+    border: 1px solid #252525;
+}
+
+QLabel {
+    color: #e0e0e0;
+    background: transparent;
+}
+
+QLabel#status {
+    color: #606060;
+}
+
+QProgressBar {
+    background-color: #1a1a1a;
+    border: none;
+}
+
+QProgressBar::chunk {
+    background-color: #3a8fff;
+}

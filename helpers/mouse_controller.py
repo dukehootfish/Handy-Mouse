@@ -8,7 +8,7 @@ and clicking, based on coordinates provided by the tracking system.
 import ctypes
 import numpy as np
 from pynput.mouse import Button, Controller
-from config_manager import config
+from core.config_manager import config
 
 class MouseController:
     """

@@ -1,0 +1,31 @@
+/* Window Controls Stylesheet */
+
+QWidget {
+    background: transparent;
+}
+
+QPushButton {
+    border: none;
+    background: transparent;
+    color: #a0a0a0;
+    font-family: "Segoe UI";
+    font-size: 10pt;
+}
+
+QPushButton:hover {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+QPushButton:pressed {
+    background-color: #1a1a1a;
+}
+
+QPushButton#close:hover {
+    background-color: #e81123;
+    color: #ffffff;
+}
+
+QPushButton#close:pressed {
+    background-color: #cf1020;
+}

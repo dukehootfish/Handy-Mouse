@@ -1,7 +1,7 @@
 from helpers.mouse_controller import MouseController
 from helpers.audio_controller import AudioController
 from helpers.hand_tracker import HandTracker
-from core.flags import HandyFlags
+from .flags import HandyFlags
 
 class HandyContext:
     def __init__(self):

@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from helpers import detectors
-from config_manager import config
+from core.config_manager import config
 from core.condition import condition
 
 @condition(priority=0)

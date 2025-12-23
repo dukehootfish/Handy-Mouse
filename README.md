@@ -1,13 +1,13 @@
 # HandyMouse
 
-HandyMouse is a Python application that allows you to control your computer mouse using hand gestures captured by your webcam. It uses **MediaPipe** for robust hand tracking and a modular architecture to map specific gestures to system actions like cursor movement, clicking, scrolling, zooming, and microphone toggling.
+HandyMouse is a Python application that allows you to control your computer mouse using hand gestures captured by your webcam. It uses **MediaPipe** for robust hand tracking and a modular architecture to map specific gestures to system actions like cursor movement, clicking, scrolling, and microphone toggling.
 
 ## Features
 
 ### 🖱️ Cursor Control
 - **Tracking**: Moves the mouse cursor based on the position of your **Index Finger Knuckle (MCP)**.
 - **Smoothing**: Integrated smoothing algorithms reduce jitter for precise control.
-- **Two-Handed Mode**: Supports using a second hand for auxiliary controls (Zoom, Exit).
+- **Two-Handed Mode**: Supports using a second hand for auxiliary controls (Exit).
 
 ### 👆 Interactions (Main Hand)
 - **Left Click**: Pinch **Thumb** and **Index Finger** together.
@@ -32,7 +32,6 @@ The project follows a modular "Conditions & Events" architecture:
   - `activation.py`: Hand activation logic.
   - `cursor.py`: Cursor movement and clicking.
   - `scroll.py`: Scrolling logic.
-  - `zoom.py`: Two-handed zoom interactions.
   - `mic_toggle.py`: Microphone mute/unmute.
   - `exit_gesture.py`: Double-fist exit logic.
 - `core/`: Core system logic (`condition.py`).
