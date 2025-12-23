@@ -180,3 +180,65 @@ def set_high_priority():
     else:
         print("Failed to set process priority.")
 
+import math
+
+def measure_true_palm_width(hand_landmarks, world_landmarks, image_shape):
+    """
+    Calculates the width of the palm in pixels as if it were rotated 
+    to face the camera at its current depth.
+    
+    Uses the "Max Scale" heuristic: The bone with the least foreshortening
+    provides the true depth scale (Pixels per Meter).
+    """
+    if not hand_landmarks or not world_landmarks:
+        return 0.0
+
+    h, w = image_shape[:2]
+    
+    # List of rigid bone connections to test for scale.
+    # We use Metacarpals (Palm bones) and Proximal Phalanges (Finger bases).
+    # Indices: 0=Wrist, 5=IndexMCP, 17=PinkyMCP, etc.
+    bones_to_check = [
+        (0, 5), (0, 17), (5, 9), (9, 13), (13, 17), # Palm structure
+        (5, 6), (9, 10), (13, 14), (17, 18)         # Proximal phalanges
+    ]
+    
+    max_pixels_per_meter = 0.0
+
+    # 1. Find the best available scale factor from the most parallel bone
+    for i1, i2 in bones_to_check:
+        # Screen Length (2D Pixels) - purely x and y
+        p1 = hand_landmarks.landmark[i1]
+        p2 = hand_landmarks.landmark[i2]
+        dist_px = math.hypot((p1.x - p2.x) * w, (p1.y - p2.y) * h)
+        
+        # World Length (3D Metric) - x, y, and z
+        # MediaPipe world landmarks are in meters (approx) with origin at wrist
+        w1 = world_landmarks.landmark[i1]
+        w2 = world_landmarks.landmark[i2]
+        dist_m = math.sqrt(
+            (w1.x - w2.x)**2 + 
+            (w1.y - w2.y)**2 + 
+            (w1.z - w2.z)**2
+        )
+        
+        if dist_m < 1e-6: continue # Avoid division by zero
+        
+        ratio = dist_px / dist_m
+        if ratio > max_pixels_per_meter:
+            max_pixels_per_meter = ratio
+
+    # 2. Get the constant 3D width of the palm (Index 5 to Pinky 17)
+    i_idx, i_pinky = 5, 17
+    w_idx = world_landmarks.landmark[i_idx]
+    w_pinky = world_landmarks.landmark[i_pinky]
+    
+    real_palm_width_m = math.sqrt(
+        (w_idx.x - w_pinky.x)**2 + 
+        (w_idx.y - w_pinky.y)**2 + 
+        (w_idx.z - w_pinky.z)**2
+    )
+    
+    # 3. Convert 3D width to pixels using the best scale found
+    return real_palm_width_m * max_pixels_per_meter
+

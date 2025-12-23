@@ -9,7 +9,7 @@ import time
 from .config_manager import config
 from .context import HandyContext
 from helpers.hand_data import HandData
-from helpers.utils import is_palm_facing_camera, is_palm_rightside_up
+from helpers.utils import is_palm_facing_camera, is_palm_rightside_up, measure_true_palm_width
 from .condition import ConditionRegistry
 
 # Import features to register conditions
@@ -39,6 +39,7 @@ class HandyMouseApp:
         self.context.cam_width = self.cam_width
         self.context.cam_height = self.cam_height
         
+        self.last_width_print_time = 0
         self.consecutive_failures = 0
 
     def process_frame(self):
@@ -63,24 +64,38 @@ class HandyMouseApp:
         self.context.frame_consumed = False
 
         # Process Hands
-        img, hand_landmarks_list, handedness_list = self.context.tracker.process_frame(img)
+        img, hand_landmarks_list, handedness_list, world_landmarks_list = self.context.tracker.process_frame(img)
         img_h, img_w = img.shape[:2]
         processed_hand = False
 
         # Store frame data in context for multi-hand conditions
         self.context.frame_landmarks = hand_landmarks_list
         self.context.frame_handedness = handedness_list
+        self.context.frame_world_landmarks = world_landmarks_list
 
         if hand_landmarks_list:
             time_now = time.time()
+            
+            should_print_width = False
+            if time_now - self.last_width_print_time >= 1.0:
+                should_print_width = True
+                self.last_width_print_time = time_now
+
             conditions = ConditionRegistry.get_all()
             processed_labels = set()  # Ensure at most one Left/Right is processed per frame
             for idx, hand_landmarks in enumerate(hand_landmarks_list):
                 if getattr(self.context, "frame_consumed", False):
                     break
-
+                
                 handedness_info = handedness_list[idx] if idx < len(handedness_list) else None
+                world_landmarks = world_landmarks_list[idx] if idx < len(world_landmarks_list) else None
                 label = self._get_hand_label(handedness_info, idx)
+                
+                # Measure and print palm width if due
+                if should_print_width:
+                    width = measure_true_palm_width(hand_landmarks, world_landmarks, img.shape)
+                    print(f"Hand {idx} ({label or 'Unknown'}) Palm Width: {width:.2f} px")
+
                 canonical_label = label if label in ("Left", "Right") else None
                 if canonical_label and canonical_label in processed_labels:
                     continue

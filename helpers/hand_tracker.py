@@ -40,7 +40,7 @@ class HandTracker:
 
     def process_frame(
         self, img: np.ndarray
-    ) -> Tuple[np.ndarray, List[NamedTuple], List[NamedTuple]]:
+    ) -> Tuple[np.ndarray, List[NamedTuple], List[NamedTuple], List[NamedTuple]]:
         """
         Process a single video frame to detect hands.
 
@@ -48,10 +48,11 @@ class HandTracker:
             img (np.ndarray): The input image (BGR format from OpenCV).
 
         Returns:
-            Tuple[np.ndarray, List[NamedTuple], List[NamedTuple]]:
+            Tuple[np.ndarray, List[NamedTuple], List[NamedTuple], List[NamedTuple]]:
                 - The processed image (BGR).
                 - Detected hand landmarks objects (possibly empty).
                 - The handedness classification entries for the detected hands.
+                - The world landmarks (3D coordinates in meters).
         """
         # Convert the BGR image to RGB before processing.
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -59,8 +60,9 @@ class HandTracker:
 
         hand_landmarks = results.multi_hand_landmarks or []
         handedness = results.multi_handedness or []
+        world_landmarks = results.multi_hand_world_landmarks or []
 
-        return img, list(hand_landmarks), list(handedness)
+        return img, list(hand_landmarks), list(handedness), list(world_landmarks)
 
     def draw_landmarks(self, img: np.ndarray, hand_landmarks, color: Tuple[int, int, int]):
         drawing_spec = self.mp_drawing.DrawingSpec(color=color, thickness=2, circle_radius=2)
